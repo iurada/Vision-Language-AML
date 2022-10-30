@@ -23,7 +23,7 @@ class BaselineExperiment:
         checkpoint = {}
 
         checkpoint['iteration'] = iteration
-        checkpoint['best_acc'] = best_accuracy
+        checkpoint['best_accuracy'] = best_accuracy
         checkpoint['total_train_loss'] = total_train_loss
 
         checkpoint['model'] = self.model.state_dict()
