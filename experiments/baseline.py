@@ -1,7 +1,7 @@
 import torch
 from models.base_model import BaselineModel
 
-class BaselineExperiment:
+class BaselineExperiment: # See point 1. of the project
     
     def __init__(self, opt):
         # Utils

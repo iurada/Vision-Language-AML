@@ -4,10 +4,9 @@ import torch
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--experiment', type=str, default='baseline', 
-        choices=['baseline', 'domain_disentangle', 'clip_disentangle', 'domain_generalization', 'finetuned_clip'])
+    parser.add_argument('--experiment', type=str, default='baseline', choices=['baseline', 'domain_disentangle', 'clip_disentangle'])
 
-    parser.add_argument('--target_domain', type=str, default='cartoon', choices=['cartoon', 'sketch', 'photo'])
+    parser.add_argument('--target_domain', type=str, default='cartoon', choices=['art_painting', 'cartoon', 'sketch', 'photo'])
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate.')
     parser.add_argument('--max_iterations', type=int, default=5000, help='Number of training iterations.')
     parser.add_argument('--batch_size', type=int, default=64)

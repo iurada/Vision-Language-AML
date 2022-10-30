@@ -36,8 +36,6 @@ At this point you should be able to run and edit the base code provided.
   - `baseline`: runs the experiment needed to reproduce the baseline (see point 1. of the project)
   - `domain_disentangle`: runs the domain disentanglement experiment (see point 2. of the project)
   - `clip_disentangle`: runs the disentanglement experiment using CLIP (see point 4. of the project)
-  - `domain_generalization`: runs the domain generalization experiment (see Variation 1 of the project)
-  - `finetuned_clip`: runs the disentanglement experiment using the finetuned version of CLIP (see Variation 2 of the project and check other arguments to see how to load the finetuned CLIP weights)
 
 ## Baseline Results (see point 1. of the project)
 TODO

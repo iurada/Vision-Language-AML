@@ -1,14 +1,24 @@
 import os
 import logging
 from parse_args import parse_arguments
-from load_data import build_splits_baseline
+from load_data import build_splits_baseline, build_splits_domain_disentangle, build_splits_clip_disentangle
 from experiments.baseline import BaselineExperiment
+from experiments.domain_disentangle import DomainDisentangleExperiment
+from experiments.clip_disentangle import CLIPDisentangleExperiment
 
 def setup_experiment(opt):
     
     if opt['experiment'] == 'baseline':
         experiment = BaselineExperiment(opt)
         train_loader, validation_loader, test_loader = build_splits_baseline(opt)
+        
+    elif opt['experiment'] == 'domain_disentangle':
+        experiment = DomainDisentangleExperiment(opt)
+        train_loader, validation_loader, test_loader = build_splits_domain_disentangle(opt)
+
+    elif opt['experiment'] == 'clip_disentangle':
+        experiment = CLIPDisentangleExperiment(opt)
+        train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt)
 
     else:
         raise ValueError('Experiment not yet supported.')
@@ -47,9 +57,9 @@ def main(opt):
                     experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
 
                 iteration += 1
-                if iteration >= opt['max_iterations']:
+                if iteration > opt['max_iterations']:
                     break
-    
+
     # Test
     experiment.load_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth')
     test_accuracy, _ = experiment.validate(test_loader)

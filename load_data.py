@@ -97,3 +97,9 @@ def build_splits_baseline(opt):
     test_loader = DataLoader(PACSDatasetBaseline(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
 
     return train_loader, val_loader, test_loader
+
+def build_splits_domain_disentangle(opt):
+    raise NotImplementedError('[TODO] Implement build_splits_domain_disentangle') #TODO
+
+def build_splits_clip_disentangle(opt):
+    raise NotImplementedError('[TODO] Implement build_splits_clip_disentangle') #TODO

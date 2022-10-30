@@ -55,7 +55,8 @@ class DomainDisentangleModel(nn.Module):
         self.category_classifier = None #TODO
 
         self.reconstructor = None #TODO
+        raise NotImplementedError('[TODO] Implement DomainDisentangleModel')
 
     def forward(self, x):
         #TODO
-        raise NotImplementedError('[TODO] Implement DomainDisentangleModel forward() method.')
+        raise NotImplementedError('[TODO] Implement DomainDisentangleModel forward() method')
