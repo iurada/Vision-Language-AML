@@ -3,6 +3,8 @@ import torch
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
+    
+    print(parser)
 
     parser.add_argument('--experiment', type=str, default='baseline', choices=['baseline', 'domain_disentangle', 'clip_disentangle'])
 
