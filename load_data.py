@@ -27,15 +27,19 @@ class PACSDatasetBaseline(Dataset):
 
 def read_lines(data_path, domain_name):
     examples = {}
-    with open(f'{data_path}/{domain_name}.txt') as f:
+    with open(f'./Vision-Language-AML/{data_path}/{domain_name}.txt') as f:
         lines = f.readlines()
 
     for line in lines: 
+        main_folder = './Vision-Language-AML/'
+        local_folder = '/kfold/'
         line = line.strip().split()[0].split('/')
         category_name = line[3]
         category_idx = CATEGORIES[category_name]
         image_name = line[4]
-        image_path = f'{data_path}/kfold/{domain_name}/{category_name}/{image_name}'
+        # image_path_zzz = f'./Vision-Language-AML/{data_path}/{domain_name}/{category_name}/{image_name}'
+        # print(f'{line}, image_path_zzz {image_path_zzz}, image_name {image_name}, category_name {category_name}, category_idx {category_idx}')
+        image_path = f'{main_folder}{data_path}{local_folder}{domain_name}/{category_name}/{image_name}'
         if category_idx not in examples.keys():
             examples[category_idx] = [image_path]
         else:

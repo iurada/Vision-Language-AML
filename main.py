@@ -6,6 +6,7 @@ from experiments.baseline import BaselineExperiment
 from experiments.domain_disentangle import DomainDisentangleExperiment
 from experiments.clip_disentangle import CLIPDisentangleExperiment
 
+
 def setup_experiment(opt):
     
     if opt['experiment'] == 'baseline':
