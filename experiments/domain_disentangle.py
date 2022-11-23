@@ -56,13 +56,9 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         self.optimizer.zero_grad()
         loss_1.backward()
-        self.optimizer.step()
         loss_2.backward()
-        self.optimizer.step()
         loss_3.backward()
-        self.optimizer.step()
         loss_4.backword()
-        self.optimizer.step()
         loss_5.backward()
         self.optimizer.step()
 
