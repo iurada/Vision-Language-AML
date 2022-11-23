@@ -12,12 +12,6 @@ CATEGORIES = {
     'person': 6,
 }
 
-TARGETS = {
-    'art_painting': 0,
-    'cartoon': 1,
-    'photo': 2,
-    'skretch': 3,
-}
 
 class PACSDatasetBaseline(Dataset):
     def __init__(self, examples, transform):
