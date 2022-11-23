@@ -68,6 +68,8 @@ def main(opt):
     print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
 
 if __name__ == '__main__':
+    
+    logging.getLogger().setLevel(logging.INFO)
 
     opt = parse_arguments()
 
