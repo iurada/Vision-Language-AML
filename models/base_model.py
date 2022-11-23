@@ -1,3 +1,4 @@
+import torch.mm as mm
 import torch.nn as nn
 from torchvision.models import resnet18
 
@@ -47,16 +48,60 @@ class DomainDisentangleModel(nn.Module):
     def __init__(self):
         super(DomainDisentangleModel, self).__init__()
         self.feature_extractor = FeatureExtractor()
+        self.domain_encoder = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
 
-        self.domain_encoder = None #TODO
-        self.category_encoder = None #TODO
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
 
-        self.domain_classifier = None #TODO
-        self.category_classifier = None #TODO
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU()
+        )
+        self.category_encoder = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
 
-        self.reconstructor = None #TODO
-        raise NotImplementedError('[TODO] Implement DomainDisentangleModel')
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU()
+        )
+        self.domain_classifier = nn.Linear(512, 4)
+        self.category_classifier = nn.Linear(512, 7)
+        self.reconstructor = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU()
+        )
 
     def forward(self, x):
-        #TODO
-        raise NotImplementedError('[TODO] Implement DomainDisentangleModel forward() method')
+        # Feature extraction
+        features = self.feature_extractor(x)
+        # Disentanglement process
+        category_specific = self.category_encoder(features)
+        domain_specific = self.domain_encoder(features)
+        # Classification process
+        category_class_cclf = self.category_classifier(category_specific) # Minimize cross-entropy loss
+        domain_class_cclf = self.category_classifier(domain_specific) # Maximize entropy loss
+        domain_class_dclf = self.domain_classifier(domain_specific) # Minimize cross-entropy loss
+        category_class_dclf = self.domain_classifier(category_specific) # Maximize entropy loss
+        # Reconstruction process
+        reconstructor = self.reconstructor(domain_specific, category_specific)
+        return reconstructor, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf
+
