@@ -56,11 +56,11 @@ class DomainDisentangleExperiment: # See point 2. of the project
         loss_5 = self.criterion(reconstructor, features_extracted)
 
         self.optimizer.zero_grad()
-        loss_1.backward()
-        loss_2.backward()
-        loss_3.backward()
-        loss_4.backword()
-        loss_5.backward()
+        loss_1.backward(retain_graph=True)
+        loss_2.backward(retain_graph=True)
+        loss_3.backward(retain_graph=True)
+        loss_4.backword(retain_graph=True)
+        loss_5.backward(retain_graph=True)
         self.optimizer.step()
 
         loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_5
