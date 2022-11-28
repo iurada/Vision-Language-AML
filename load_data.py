@@ -130,7 +130,7 @@ def build_splits_domain_disentangle(opt):
     val_examples = []
     test_examples = []
 
-    dataset = [(s, c, 0) for c, s in source_examples.items()] + [(t, c, 1) for c, t in target_examples.items()]
+    dataset = [[s, c, 0] for c, s in source_examples.items()] + [[t, c, 1] for c, t in target_examples.items()]
     random.shuffle(dataset)
 
     test_examples = dataset[0:len(target_examples.items())]
