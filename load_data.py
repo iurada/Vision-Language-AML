@@ -126,21 +126,25 @@ def build_splits_domain_disentangle(opt):
     source_examples = read_lines(opt['data_path'], source_domain)
     target_examples = read_lines(opt['data_path'], target_domain)
 
+    dataset = []
     train_examples = []
     val_examples = []
     test_examples = []
 
-    dataset = [[s, c, 0] for c, s in source_examples.items()] + [[t, c, 1] for c, t in target_examples.items()]
+    for category, example_list in source_examples.items():
+        for example in example_list:
+            dataset.append([example, category, 0])
+    
+    for category, example_list in target_examples.items():
+        for example in example_list:
+            dataset.append([example, category, 1])
+    
     random.shuffle(dataset)
-
-    print(dataset[0:5])
 
     test_examples = dataset[0:len(target_examples.items())]
     train_val = dataset[len(target_examples.items()):]
     train_examples = train_val[0:round(0.8*len(train_val))]
     val_examples = train_val[round(0.8*len(train_val)):]
-
-    print(train_examples[0:5])
     
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
