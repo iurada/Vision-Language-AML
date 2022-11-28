@@ -1,6 +1,7 @@
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as T
+import random
 
 CATEGORIES = {
     'dog': 0,
@@ -137,17 +138,12 @@ def build_splits_domain_disentangle(opt):
     val_examples = []
     test_examples = []
 
-    for category_idx, examples_list in source_examples.items():
-        split_idx = round(source_category_ratios[category_idx] * val_split_length)
-        for i, example in enumerate(examples_list):
-            if i < split_idx:
-                train_examples.append([example, category_idx, 0]) # each pair is [path_to_img, class_label, domain]
-            else:
-                val_examples.append([example, category_idx, 0]) # each pair is [path_to_img, class_label, domain]
-    
-    for category_idx, examples_list in target_examples.items():
-        for example in examples_list:
-            test_examples.append([example, category_idx, 1]) # each pair is [path_to_img, class_label, domain]
+    dataset = random.shuffle([(s, c, 0) for c, s in source_examples.items()] + [(t, c, 1) for c, t in target_examples.items()])
+
+    test_examples = dataset[0:len(target_examples.items())]
+    train_val = dataset[len(target_examples.items()):]
+    train_examples = train_val[0:round(0.8*len(train_val))]
+    val_examples = train_val[round(0.8*len(train_val)):]
     
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
