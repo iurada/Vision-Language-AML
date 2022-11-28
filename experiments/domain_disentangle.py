@@ -59,7 +59,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         loss_1.backward(retain_graph=True)
         loss_2.backward(retain_graph=True)
         loss_3.backward(retain_graph=True)
-        loss_4.backword(retain_graph=True)
+        loss_4.backward(retain_graph=True)
         loss_5.backward(retain_graph=True)
         self.optimizer.step()
 
