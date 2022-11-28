@@ -43,16 +43,17 @@ class DomainDisentangleExperiment: # See point 2. of the project
         return iteration, best_accuracy, total_train_loss
 
     def train_iteration(self, data):
-        x, y = data
+        x, y, domain = data
         x = x.to(self.device)
         y = y.to(self.device)
+        domain = domain.to(self.device)
 
-        reconstructor, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf = self.model(x)
+        reconstructor, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf, features_extracted = self.model(x)
         loss_1 = self.criterion(category_class_cclf, y)
-        loss_2 = -self.criterion(category_class_dclf, y)
-        loss_3 = self.criterion(domain_class_dclf, y)
+        loss_2 = -self.criterion(category_class_dclf, domain) 
+        loss_3 = self.criterion(domain_class_dclf, domain) 
         loss_4 = -self.criterion(domain_class_cclf, y)
-        loss_5 = self.criterion(reconstructor, x)
+        loss_5 = self.criterion(reconstructor, features_extracted)
 
         self.optimizer.zero_grad()
         loss_1.backward()
@@ -72,7 +73,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         count = 0
         loss = 0
         with torch.no_grad():
-            for x, y in loader:
+            for x, y, _ in loader:
                 x = x.to(self.device)
                 y = y.to(self.device)
 

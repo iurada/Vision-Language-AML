@@ -103,5 +103,5 @@ class DomainDisentangleModel(nn.Module):
         category_class_dclf = self.domain_classifier(category_specific) # Maximize entropy loss
         # Reconstruction process
         reconstructor = self.reconstructor(torch.cat((domain_specific, category_specific)))
-        return reconstructor, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf
+        return reconstructor, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf, features
 
