@@ -126,19 +126,12 @@ def build_splits_domain_disentangle(opt):
     source_examples = read_lines(opt['data_path'], source_domain)
     target_examples = read_lines(opt['data_path'], target_domain)
 
-    # Compute ratios of examples for each category
-    source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
-    source_total_examples = sum(source_category_ratios.values())
-    source_category_ratios = {category_idx: c / source_total_examples for category_idx, c in source_category_ratios.items()}
-
-    # Build splits - we train only on the source domain (Art Painting)
-    val_split_length = source_total_examples * 0.2 # 20% of the training split used for validation
-
     train_examples = []
     val_examples = []
     test_examples = []
 
-    dataset = random.shuffle([(s, c, 0) for c, s in source_examples.items()] + [(t, c, 1) for c, t in target_examples.items()])
+    dataset = [(s, c, 0) for c, s in source_examples.items()] + [(t, c, 1) for c, t in target_examples.items()]
+    random.shuffle(dataset)
 
     test_examples = dataset[0:len(target_examples.items())]
     train_val = dataset[len(target_examples.items()):]
