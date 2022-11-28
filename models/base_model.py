@@ -77,7 +77,7 @@ class DomainDisentangleModel(nn.Module):
         self.domain_classifier = nn.Linear(512, 2)
         self.category_classifier = nn.Linear(512, 7)
         self.reconstructor = nn.Sequential(
-            nn.Linear(512, 512),
+            nn.Linear(1024, 512),
             nn.BatchNorm1d(512),
             nn.ReLU(),
 
@@ -102,6 +102,6 @@ class DomainDisentangleModel(nn.Module):
         domain_class_dclf = self.domain_classifier(domain_specific) # Minimize cross-entropy loss
         category_class_dclf = self.domain_classifier(category_specific) # Maximize entropy loss
         # Reconstruction process
-        reconstructor = self.reconstructor(torch.cat((domain_specific, category_specific)))
+        reconstructor = self.reconstructor(torch.cat((category_specific, domain_specific), dim=1))
         return reconstructor, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf, features
 
