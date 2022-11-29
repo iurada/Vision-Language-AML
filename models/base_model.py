@@ -25,7 +25,7 @@ class ImageReconstructor(nn.Module):
         self.resnet18 = resnet18(pretrained=True)
 
     def forward(self, x):
-        x = x.squeeze()
+        # x = x.squeeze()
         x = self.resnet18.avgpool(x)
         x = self.resnet18.layer4(x)
         x = self.resnet18.layer3(x)
