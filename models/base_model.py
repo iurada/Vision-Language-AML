@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 import torch.nn as nn
 from torchvision.models import resnet18
 
@@ -25,16 +26,15 @@ class ImageReconstructor(nn.Module):
         self.resnet18 = resnet18(pretrained=True)
 
     def forward(self, x):
-        #x = x.squeeze()
-        #x = self.resnet18.avgpool(x)
+        x = nn.Linear(10, 512)
+        x = x.view(x.size(0), 512, 1, 1)
+        x = F.interpolate(x, scale_factor=4)
         x = self.resnet18.layer4(x)
         x = self.resnet18.layer3(x)
         x = self.resnet18.layer2(x)
         x = self.resnet18.layer1(x)
-        x = self.resnet18.maxpool(x)
-        x = self.resnet18.relu(x)
-        x = self.resnet18.bn1(x)
-        x = self.resnet18.conv1(x)
+        x = torch.sigmoid(self.conv1(x))
+        x = x.view(x.size(0), 3, 64, 64)
         return x
 
 class BaselineModel(nn.Module):
