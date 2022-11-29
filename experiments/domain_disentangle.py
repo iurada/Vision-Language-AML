@@ -48,12 +48,12 @@ class DomainDisentangleExperiment: # See point 2. of the project
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        reconstructor, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf, features_extracted = self.model(x)
+        i_reconstructor_1, i_reconstructor_2, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf = self.model(x)
         loss_1 = self.criterion(category_class_cclf, y)
         loss_2 = -self.criterion(category_class_dclf, domain) 
         loss_3 = self.criterion(domain_class_dclf, domain) 
         loss_4 = -self.criterion(domain_class_cclf, y)
-        loss_5 = self.criterion(reconstructor, features_extracted)
+        loss_5 = self.criterion(i_reconstructor_1, x) + self.criterion(i_reconstructor_2, x)
 
         self.optimizer.zero_grad()
         loss_1.backward(retain_graph=True)
@@ -77,7 +77,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
                 x = x.to(self.device)
                 y = y.to(self.device)
 
-                _, category_class_cclf, _ , _ , _, _  = self.model(x)
+                _, _, category_class_cclf, _ , _ , _  = self.model(x)
                 loss += self.criterion(category_class_cclf, y)
                 pred = torch.argmax(category_class_cclf, dim=-1)
 

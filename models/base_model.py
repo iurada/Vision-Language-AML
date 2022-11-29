@@ -19,6 +19,24 @@ class FeatureExtractor(nn.Module):
         x = self.resnet18.avgpool(x)
         return x.squeeze()
 
+class ImageReconstructor(nn.Module):
+    def __init__(self) -> None:
+        super(ImageReconstructor, self).__init__()
+        self.resnet18 = resnet18(pretrained=True)
+
+    def forward(self, x):
+        x = x.squeeze()
+        x = self.resnet18.avgpool(x)
+        x = self.resnet18.layer4(x)
+        x = self.resnet18.layer3(x)
+        x = self.resnet18.layer2(x)
+        x = self.resnet18.layer1(x)
+        x = self.resnet18.maxpool(x)
+        x = self.resnet18.relu(x)
+        x = self.resnet18.bn1(x)
+        x = self.resnet18.conv1(x)
+        return x
+
 class BaselineModel(nn.Module):
     def __init__(self):
         super(BaselineModel, self).__init__()
@@ -48,6 +66,7 @@ class DomainDisentangleModel(nn.Module):
     def __init__(self):
         super(DomainDisentangleModel, self).__init__()
         self.feature_extractor = FeatureExtractor()
+        self.image_reconstructor = ImageReconstructor()
         self.domain_encoder = nn.Sequential(
             nn.Linear(512, 512),
             nn.BatchNorm1d(512),
@@ -76,8 +95,8 @@ class DomainDisentangleModel(nn.Module):
         )
         self.domain_classifier = nn.Linear(512, 2)
         self.category_classifier = nn.Linear(512, 7)
-        self.reconstructor = nn.Sequential(
-            nn.Linear(1024, 512),
+        self.feature_reconstructor = nn.Sequential(
+            nn.Linear(512, 512),
             nn.BatchNorm1d(512),
             nn.ReLU(),
 
@@ -102,6 +121,9 @@ class DomainDisentangleModel(nn.Module):
         domain_class_dclf = self.domain_classifier(domain_specific) # Minimize cross-entropy loss
         category_class_dclf = self.domain_classifier(category_specific) # Maximize entropy loss
         # Reconstruction process
-        reconstructor = self.reconstructor(torch.cat((category_specific, domain_specific), dim=1))
-        return reconstructor, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf, features
+        f_reconstructor_1 = self.feature_reconstructor(domain_specific)
+        f_reconstructor_2 = self.feature_reconstructor(category_specific)
+        i_reconstructor_1 = self.image_reconstructor(f_reconstructor_1)
+        i_reconstructor_2 = self.image_reconstructor(f_reconstructor_2)
+        return i_reconstructor_1, i_reconstructor_2, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf
 
