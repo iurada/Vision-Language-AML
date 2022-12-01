@@ -79,17 +79,11 @@ class DomainDisentangleModel(nn.Module):
         self.category_classifier = nn.Linear(64, 7)
         self.feature_reconstructor = nn.Sequential(
             # nn.Conv2d(512, 512)
+            nn.Linear(128,256),
             nn.ReLU(),
-            nn.BatchNorm1d(64),
-            nn.Linear(64, 128),
 
-            nn.ReLU(),
-            nn.BatchNorm1d(128),
-            nn.Linear(128, 256),
-
-            nn.ReLU(),
-            nn.BatchNorm1d(256),
-            nn.Linear(256, 512)
+            nn.Linear(256,512),
+            nn.ReLU()
         )
 
     def forward(self, x):
@@ -104,6 +98,6 @@ class DomainDisentangleModel(nn.Module):
         domain_class_dclf = self.domain_classifier(domain_specific) # Minimize cross-entropy loss
         category_class_dclf = self.domain_classifier(category_specific) # Maximize entropy loss
         # Reconstruction process
-        reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific))
+        reconstructor = self.feature_reconstructor(torch.cat((category_specific, domain_specific),0))
         return reconstructor, features, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf
 
