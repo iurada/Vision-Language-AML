@@ -77,6 +77,6 @@ if __name__ == '__main__':
     os.makedirs(opt['output_path'], exist_ok=True)
    
     # Setup logger
-    print(filename=f'{opt["output_path"]}/log.txt', format='%(message)s', level=logging.INFO, filemode='a')
+    logging.basicConfig(filename=f'{opt["output_path"]}/log.txt', format='%(message)s', level=logging.INFO, filemode='a')
 
     main(opt)
