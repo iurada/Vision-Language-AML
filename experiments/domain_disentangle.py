@@ -16,7 +16,9 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         # Setup optimization procedure
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
-        self.criterion = torch.nn.CrossEntropyLoss()
+        self.criterion_1 = torch.nn.CrossEntropyLoss()
+        self.criterion_2 = torch.nn.BCELoss()
+        self.criterion_3 = torch.nn.MSELoss()
 
     def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
         checkpoint = {}
@@ -49,11 +51,11 @@ class DomainDisentangleExperiment: # See point 2. of the project
         domain = domain.to(self.device)
 
         reconstructor, features, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf = self.model(x)
-        loss_1 = self.criterion(category_class_cclf, y)
-        loss_2 = -self.criterion(category_class_dclf, domain) 
-        loss_3 = self.criterion(domain_class_dclf, domain) 
-        loss_4 = -self.criterion(domain_class_cclf, y)
-        loss_5 = self.criterion(reconstructor, features)
+        loss_1 = self.criterion_1(category_class_cclf, y)
+        loss_2 = -self.criterion_2(category_class_dclf, domain) 
+        loss_3 = self.criterion_2(domain_class_dclf, domain) 
+        loss_4 = -self.criterion_1(domain_class_cclf, y)
+        loss_5 = self.criterion_3(reconstructor, features)
 
         self.optimizer.zero_grad()
         loss_1.backward(retain_graph=True)

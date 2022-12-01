@@ -47,12 +47,12 @@ def main(opt):
                 total_train_loss += experiment.train_iteration(data)
 
                 if iteration % opt['print_every'] == 0:
-                    logging.info(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
+                    print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
                 
                 if iteration % opt['validate_every'] == 0:
                     # Run validation
                     val_accuracy, val_loss = experiment.validate(validation_loader)
-                    logging.info(f'[VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
+                    print(f'[VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                     if val_accuracy > best_accuracy:
                         experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss)
                     experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
@@ -77,6 +77,6 @@ if __name__ == '__main__':
     os.makedirs(opt['output_path'], exist_ok=True)
    
     # Setup logger
-    logging.basicConfig(filename=f'{opt["output_path"]}/log.txt', format='%(message)s', level=logging.INFO, filemode='a')
+    print(filename=f'{opt["output_path"]}/log.txt', format='%(message)s', level=logging.INFO, filemode='a')
 
     main(opt)
