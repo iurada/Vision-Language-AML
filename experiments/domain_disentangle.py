@@ -79,7 +79,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
                 y = y.to(self.device)
 
                 _, _, category_class_cclf, _ , _ , _  = self.model(x)
-                loss += self.criterion(category_class_cclf, y)
+                loss += self.criterion_1(category_class_cclf, y)
                 pred = torch.argmax(category_class_cclf, dim=-1)
 
                 accuracy += (pred == y).sum().item()
