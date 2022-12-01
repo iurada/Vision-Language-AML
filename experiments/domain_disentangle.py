@@ -48,12 +48,12 @@ class DomainDisentangleExperiment: # See point 2. of the project
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        i_reconstructor_1, i_reconstructor_2, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf = self.model(x)
+        reconstructor, features, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf = self.model(x)
         loss_1 = self.criterion(category_class_cclf, y)
         loss_2 = -self.criterion(category_class_dclf, domain) 
         loss_3 = self.criterion(domain_class_dclf, domain) 
         loss_4 = -self.criterion(domain_class_cclf, y)
-        loss_5 = self.criterion(i_reconstructor_1, x) + self.criterion(i_reconstructor_2, x)
+        loss_5 = self.criterion(reconstructor, features)
 
         self.optimizer.zero_grad()
         loss_1.backward(retain_graph=True)

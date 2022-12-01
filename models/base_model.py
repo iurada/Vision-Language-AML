@@ -20,23 +20,6 @@ class FeatureExtractor(nn.Module):
         x = self.resnet18.avgpool(x)
         return x.squeeze()
 
-class ImageReconstructor(nn.Module):
-    def __init__(self) -> None:
-        super(ImageReconstructor, self).__init__()
-        self.resnet18 = resnet18(pretrained=True)
-
-    def forward(self, x):
-        x = nn.Linear(10, 512)
-        x = x.view(x.size(0), 512, 1, 1)
-        x = F.interpolate(x, scale_factor=4)
-        x = self.resnet18.layer4(x)
-        x = self.resnet18.layer3(x)
-        x = self.resnet18.layer2(x)
-        x = self.resnet18.layer1(x)
-        x = torch.sigmoid(self.conv1(x))
-        x = x.view(x.size(0), 3, 64, 64)
-        return x
-
 class BaselineModel(nn.Module):
     def __init__(self):
         super(BaselineModel, self).__init__()
@@ -66,47 +49,47 @@ class DomainDisentangleModel(nn.Module):
     def __init__(self):
         super(DomainDisentangleModel, self).__init__()
         self.feature_extractor = FeatureExtractor()
-        self.image_reconstructor = ImageReconstructor()
         self.domain_encoder = nn.Sequential(
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
             nn.ReLU(),
 
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(128),
             nn.ReLU(),
 
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
             nn.ReLU()
         )
         self.category_encoder = nn.Sequential(
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
             nn.ReLU(),
 
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(128),
             nn.ReLU(),
 
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
+            nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
             nn.ReLU()
         )
-        self.domain_classifier = nn.Linear(512, 2)
-        self.category_classifier = nn.Linear(512, 7)
+        self.domain_classifier = nn.Linear(64, 2)
+        self.category_classifier = nn.Linear(64, 7)
         self.feature_reconstructor = nn.Sequential(
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
-            nn.ReLU(),
-
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
-            nn.ReLU(),
-
-            nn.Linear(512, 512),
-            nn.BatchNorm1d(512),
+            # nn.Conv2d(512, 512)
             nn.ReLU()
+            nn.BatchNorm1d(64)
+            nn.Linear(64, 128)
+
+            nn.ReLU()
+            nn.BatchNorm1d(128)
+            nn.Linear(128, 256)
+
+            nn.ReLU()
+            nn.BatchNorm1d(256)
+            nn.Linear(256, 512)
         )
 
     def forward(self, x):
@@ -121,9 +104,6 @@ class DomainDisentangleModel(nn.Module):
         domain_class_dclf = self.domain_classifier(domain_specific) # Minimize cross-entropy loss
         category_class_dclf = self.domain_classifier(category_specific) # Maximize entropy loss
         # Reconstruction process
-        f_reconstructor_1 = self.feature_reconstructor(domain_specific)
-        f_reconstructor_2 = self.feature_reconstructor(category_specific)
-        i_reconstructor_1 = self.image_reconstructor(f_reconstructor_1)
-        i_reconstructor_2 = self.image_reconstructor(f_reconstructor_2)
-        return i_reconstructor_1, i_reconstructor_2, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf
+        reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific))
+        return reconstructor, features, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf
 
