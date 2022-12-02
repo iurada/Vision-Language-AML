@@ -49,24 +49,26 @@ class DomainDisentangleExperiment: # See point 2. of the project
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        reconstructor, features, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf = self.model(x)
-        loss_1 = self.criterion_1(category_class_cclf, y)
-        loss_2 = -self.criterion_1(category_class_dclf, domain) 
-        loss_3 = self.criterion_1(domain_class_dclf, domain) 
-        loss_4 = -self.criterion_1(domain_class_cclf, y)
-        loss_5 = self.criterion_2(reconstructor, features)
-
-        self.optimizer.zero_grad()
-        loss_1.backward(retain_graph=True)
-        loss_2.backward(retain_graph=True)
-        loss_3.backward(retain_graph=True)
-        loss_4.backward(retain_graph=True)
-        loss_5.backward(retain_graph=True)
-        self.optimizer.step()
-
-        loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_5
-        
-        return loss.item()
+        results = self.model(x, domain)
+        if domain == 0:
+            loss_1 = self.criterion_1(results[2], y)
+            loss_2 = -self.criterion_1(results[3], domain) 
+            loss_3 = self.criterion_2(results[0], results[1])
+            self.optimizer.zero_grad()
+            loss_1.backward(retain_graph=True)
+            loss_2.backward(retain_graph=True)
+            loss_3.backward(retain_graph=True)
+            self.optimizer.step()
+            loss = loss_1+loss_2+loss_3
+            return loss.item()
+        else:
+            loss_1 = self.criterion_1(results[2], domain)
+            loss_2 = self.criterion_2(results[0], results[1])
+            loss_1.backward(retain_graph=True)
+            loss_2.backward(retain_graph=True)
+            self.optimizer.step()
+            loss = loss_1+loss_2
+            return loss.item()
 
     def validate(self, loader):
         self.model.eval()

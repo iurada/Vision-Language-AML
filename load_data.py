@@ -126,25 +126,25 @@ def build_splits_domain_disentangle(opt):
     source_examples = read_lines(opt['data_path'], source_domain)
     target_examples = read_lines(opt['data_path'], target_domain)
 
-    dataset = []
     train_examples = []
+    train_examples_for_cclf = []
+    train_examples_for_dclf = []
     val_examples = []
     test_examples = []
 
     for category, example_list in source_examples.items():
         for example in example_list:
-            dataset.append([example, category, 0])
+            train_examples_for_cclf.append([example, category, 0])
     
     for category, example_list in target_examples.items():
         for example in example_list:
-            dataset.append([example, category, 1])
-    
-    random.shuffle(dataset)
+            train_examples_for_dclf.append([example, category, 1])
+            test_examples.append([example, category])
 
-    test_examples = dataset[0:len(target_examples.items())]
-    train_val = dataset[len(target_examples.items()):]
-    train_examples = train_val[0:round(0.8*len(train_val))]
-    val_examples = train_val[round(0.8*len(train_val)):]
+    train_examples = train_examples_for_cclf[0:round(0.8*len(train_examples_for_cclf))]
+    val_examples = train_examples_for_cclf[round(0.8*len(train_examples_for_cclf)):]
+
+    train_examples += train_examples_for_dclf
     
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
@@ -165,8 +165,8 @@ def build_splits_domain_disentangle(opt):
     ])
 
     # Dataloaders
-    train_loader = DataLoader(PACSDatasetDomainDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    val_loader = DataLoader(PACSDatasetDomainDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    train_loader = DataLoader(PACSDatasetDomainDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True) 
+    val_loader = DataLoader(PACSDatasetBaseline(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
     test_loader = DataLoader(PACSDatasetDomainDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
 
     return train_loader, val_loader, test_loader
