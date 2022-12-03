@@ -69,11 +69,13 @@ class DomainDisentangleExperiment: # See point 2. of the project
         else:
             # Training with target
             loss_1 = self.criterion_1(results[2], domain) 
-            loss_2 = self.criterion_2(results[0], results[1])
+            loss_2 = -self.criterion_1(results[3], domain)
+            loss_3 = self.criterion_2(results[0], results[1])
             loss_1.backward(retain_graph=True)
             loss_2.backward(retain_graph=True)
+            loss_3.backward(retain_graph=True)
             self.optimizer.step()
-            loss = loss_1 + loss_2
+            loss = loss_1 + loss_2 + loss_3
             return loss.item()
 
     def validate(self, loader, label):
@@ -96,7 +98,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
                     count += x.size(0)
                 elif label == 1:
                     # Validation with target
-                    _, _, domain_class = self.model(x, label)
+                    _, _, domain_class, _ = self.model(x, label)
                     loss += self.criterion_1(domain_class, domain)
                     pred = torch.argmax(domain_class, dim=-1)
                     accuracy += (pred == y).sum().item()
