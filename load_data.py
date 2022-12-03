@@ -126,10 +126,8 @@ def build_splits_domain_disentangle(opt):
     source_examples = read_lines(opt['data_path'], source_domain)
     target_examples = read_lines(opt['data_path'], target_domain)
 
-    train_examples = []
     train_examples_for_cclf = []
     train_examples_for_dclf = []
-    val_examples = []
     test_examples = []
 
     for category, example_list in source_examples.items():
@@ -141,12 +139,15 @@ def build_splits_domain_disentangle(opt):
             train_examples_for_dclf.append([example, category, 1])
             test_examples.append([example, category])
 
-    train_examples = train_examples_for_cclf[0:round(0.8*len(train_examples_for_cclf))]
-    val_examples = train_examples_for_cclf[round(0.8*len(train_examples_for_cclf)):]
+    train_examples_1 = train_examples_for_cclf[0:round(0.8*len(train_examples_for_cclf))]
+    val_examples_cclf = train_examples_for_cclf[round(0.8*len(train_examples_for_cclf)):]
 
-    train_examples_1 = train_examples
-    train_examples_2 = train_examples + train_examples_for_dclf
-    
+    train_examples_for_dclf += train_examples_for_cclf
+    train_examples_2 = train_examples_for_dclf[0:round(0.8*len(train_examples_for_dclf))]
+    val_examples_dclf = train_examples_for_dclf[round(0.8*len(train_examples_for_dclf)):]
+
+
+
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
 
@@ -168,10 +169,11 @@ def build_splits_domain_disentangle(opt):
     # Dataloaders
     train_loader_1 = DataLoader(PACSDatasetDomainDisentangle(train_examples_1, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True) 
     train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples_2, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    val_loader = DataLoader(PACSDatasetDomainDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    val_loader_1 = DataLoader(PACSDatasetDomainDisentangle(val_examples_cclf, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples_dclf, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
     test_loader = DataLoader(PACSDatasetDomainDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
 
-    return train_loader_1, train_loader_2, val_loader, test_loader
+    return train_loader_1, train_loader_2, val_loader_1, val_loader_2, test_loader
 
 def build_splits_clip_disentangle(opt):
     raise NotImplementedError('[TODO] Implement build_splits_clip_disentangle') #TODO
