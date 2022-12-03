@@ -137,7 +137,7 @@ def build_splits_domain_disentangle(opt):
     for category, example_list in target_examples.items():
         for example in example_list:
             train_examples_for_dclf.append([example, category, 1])
-            test_examples.append([example, category])
+            test_examples.append([example, category, 1])
 
     train_examples_1 = train_examples_for_cclf[0:round(0.8*len(train_examples_for_cclf))]
     val_examples_cclf = train_examples_for_cclf[round(0.8*len(train_examples_for_cclf)):]
