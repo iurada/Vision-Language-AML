@@ -97,11 +97,11 @@ class DomainDisentangleModel(nn.Module):
         features = self.feature_extractor(x)
         # Disentanglement process
         if label == 0:
-            # Pre-training
+            # Training with source
+            domain_specific = self.domain_encoder(features)
             category_specific = self.category_encoder(features)
         elif label == 1:
-            # Adversarial Adaptation
-            category_specific = self.category_encoder(features)
+            # Training with target
             domain_specific = self.domain_encoder(features)
         else:
             # Testing
@@ -109,26 +109,28 @@ class DomainDisentangleModel(nn.Module):
 
         # Classification process
         if label == 0:
-            # Pre-training
-            category_class_cclf = self.category_classifier(category_specific) # Minimize loss
-            reconstructor = self.feature_reconstructor(category_specific) # Minimize loss
+            # Training with source
+            category_class_ce = self.category_classifier(category_specific) # Minimize loss
+            domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
+            category_class_de = self.category_classifier(domain_specific) # Maximize loss
+            domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
+            reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific)) # Minimize loss
         elif label == 1:
-            # Adversarial Adaptation
-            domain_class_dclf_s = self.domain_classifier(category_specific) # Maximize loss
-            domain_class_dclf_d = self.domain_classifier(domain_specific) # Minimize loss
+            # Training with target
+            domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
             reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific)) # Minimize loss
         else:
             # Testing
-            category_class_cclf = self.category_classifier(domain_specific)
+            category_class = self.category_classifier(domain_specific)
 
         # Return objects
         if label == 0:
-            # Pre-training
-            return reconstructor, features, category_class_cclf
+            # Training with source
+            return reconstructor, features, category_class_ce, domain_class_de, category_class_de, domain_class_ce
         elif label == 1:
-            # Adversarial Adaptation
-            return reconstructor, features, domain_class_dclf_s, domain_class_dclf_d
+            # Training with target
+            return reconstructor, features, domain_class_de
         else:
             # Testing
-            return category_class_cclf
+            return category_class
 
