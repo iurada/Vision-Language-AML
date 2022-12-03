@@ -43,51 +43,66 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         return iteration, best_accuracy, total_train_loss
 
-    def train_iteration(self, data):
+    def train_iteration(self, data, label):
         x, y, domain = data
         x = x.to(self.device)
         y = y.to(self.device)
-        domain_type = domain
-        print(type(domain_type))
         domain = domain.to(self.device)
 
-        results = self.model(x, domain_type)
-        if domain_type == 0:
+        results = self.model(x, label)
+        if label == 0:
+            # Pre-training
             loss_1 = self.criterion_1(results[2], y)
-            loss_2 = -self.criterion_1(results[3], domain) 
-            loss_3 = self.criterion_2(results[0], results[1])
+            loss_2 = self.criterion_2(results[0], results[1])
             self.optimizer.zero_grad()
+            loss_1.backward(retain_graph=True)
+            loss_2.backward(retain_graph=True)
+            self.optimizer.step()
+            loss = loss_1 + loss_2
+            return loss.item()
+        else:
+            # Adversarial Adaptation
+            loss_1 = -self.criterion_1(results[2], domain)
+            loss_2 = self.criterion_1(results[3], domain) 
+            loss_3 = self.criterion_2(results[0], results[1])
             loss_1.backward(retain_graph=True)
             loss_2.backward(retain_graph=True)
             loss_3.backward(retain_graph=True)
             self.optimizer.step()
-            loss = loss_1+loss_2+loss_3
-            return loss.item()
-        else:
-            loss_1 = self.criterion_1(results[2], domain)
-            loss_2 = self.criterion_2(results[0], results[1])
-            loss_1.backward(retain_graph=True)
-            loss_2.backward(retain_graph=True)
-            self.optimizer.step()
-            loss = loss_1+loss_2
+            loss = loss_1 + loss_2 + loss_3
             return loss.item()
 
-    def validate(self, loader):
+    def validate(self, loader, label):
         self.model.eval()
         accuracy = 0
         count = 0
         loss = 0
         with torch.no_grad():
-            for x, y, _ in loader:
+            for x, y, domain in loader:
                 x = x.to(self.device)
                 y = y.to(self.device)
+                domain = domain.to(self.device)
 
-                _, _, category_class_cclf, _ , _ , _  = self.model(x)
-                loss += self.criterion_1(category_class_cclf, y)
-                pred = torch.argmax(category_class_cclf, dim=-1)
-
-                accuracy += (pred == y).sum().item()
-                count += x.size(0)
+                if label == 0:
+                    #Pre-training                
+                    _, _, category_class_cclf = self.model(x, label)
+                    loss += self.criterion_1(category_class_cclf, y)
+                    pred = torch.argmax(category_class_cclf, dim=-1)
+                    accuracy += (pred == y).sum().item()
+                    count += x.size(0)
+                elif label == 1:
+                    # Adversarial Adaptation
+                    _, _, _, domain_class_dclf_d = self.model(x, label)
+                    loss += self.criterion_1(domain_class_dclf_d, domain)
+                    pred = torch.argmax(domain_class_dclf_d, dim=-1)
+                    accuracy += (pred == y).sum().item()
+                    count += x.size(0)
+                else:
+                    result = self.model(x, label)
+                    loss += self.criterion_1(result, y)
+                    pred = torch.argmax(result, dim=-1)
+                    accuracy += (pred==y).sum().item()
+                    count += x.size(0)
 
         mean_accuracy = accuracy / count
         mean_loss = loss / count
