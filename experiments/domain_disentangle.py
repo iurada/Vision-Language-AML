@@ -50,7 +50,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         domain_type = domain
         domain = domain.to(self.device)
 
-        results = self.model(x, domain)
+        results = self.model(x, domain_type)
         if domain_type == 0:
             loss_1 = self.criterion_1(results[2], y)
             loss_2 = -self.criterion_1(results[3], domain) 
