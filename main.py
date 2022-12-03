@@ -88,6 +88,9 @@ def main(opt):
                     iteration += 1
                     if iteration > opt['max_iterations']:
                         break
+            iteration = 0
+            best_accuracy = 0
+            total_train_loss = 0
             print('Adversarial Adaptation process')
             # Adversarial Adaptation loop
             while iteration < opt['max_iterations']:
