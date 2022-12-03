@@ -48,6 +48,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         x = x.to(self.device)
         y = y.to(self.device)
         domain_type = domain
+        print(type(domain_type))
         domain = domain.to(self.device)
 
         results = self.model(x, domain_type)
