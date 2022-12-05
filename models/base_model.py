@@ -90,18 +90,47 @@ class DomainDisentangleModel(nn.Module):
             nn.ReLU()
         )
 
-    def forward(self, x):
+    def forward(self, x, label):
         # Feature extraction
         features = self.feature_extractor(x)
         # Disentanglement process
-        category_specific = self.category_encoder(features)
-        domain_specific = self.domain_encoder(features)
+        if label == 0:
+            # Training with source
+            domain_specific = self.domain_encoder(features)
+            category_specific = self.category_encoder(features)
+        elif label == 1:
+            # Training with target
+            domain_specific = self.domain_encoder(features)
+            category_specific = self.category_encoder(features)
+        else:
+            # Testing
+            category_specific = self.category_encoder(features)
+
         # Classification process
-        category_class_cclf = self.category_classifier(category_specific) # Minimize cross-entropy loss
-        domain_class_cclf = self.category_classifier(domain_specific) # Maximize entropy loss
-        domain_class_dclf = self.domain_classifier(domain_specific) # Minimize cross-entropy loss
-        category_class_dclf = self.domain_classifier(category_specific) # Maximize entropy loss
-        # Reconstruction process
-        reconstructor = self.feature_reconstructor(torch.cat((category_specific, domain_specific),0))
-        return reconstructor, features, category_class_cclf, domain_class_cclf, domain_class_dclf, category_class_dclf
+        if label == 0:
+            # Training with source
+            category_class_ce = self.category_classifier(category_specific) # Minimize loss
+            domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
+            category_class_de = self.category_classifier(domain_specific) # Maximize loss
+            domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
+            reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific)) # Minimize loss
+        elif label == 1:
+            # Training with target
+            domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
+            domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
+            reconstructor = self.feature_reconstructor(domain_specific) # Minimize loss
+        else:
+            # Testing
+            category_class = self.category_classifier(category_specific)
+
+        # Return objects
+        if label == 0:
+            # Training with source
+            return reconstructor, features, category_class_ce, domain_class_de, category_class_de, domain_class_ce
+        elif label == 1:
+            # Training with target
+            return reconstructor, features, domain_class_de, domain_class_ce
+        else:
+            # Testing
+            return category_class
 
