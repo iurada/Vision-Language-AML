@@ -71,6 +71,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
             loss_1 = self.criterion_1(results[2], domain) 
             loss_2 = -self.criterion_1(results[3], domain)
             loss_3 = self.criterion_2(results[0], results[1])
+            self.optimizer.zero_grad()
             loss_1.backward(retain_graph=True)
             loss_2.backward(retain_graph=True)
             loss_3.backward(retain_graph=True)
