@@ -96,12 +96,7 @@ class DomainDisentangleModel(nn.Module):
         # Feature extraction
         features = self.feature_extractor(x)
         # Disentanglement process
-        if label == 0:
-            # Training with source
-            domain_specific = self.domain_encoder(features)
-            category_specific = self.category_encoder(features)
-        elif label == 1:
-            # Training with target
+        if label != 2:
             domain_specific = self.domain_encoder(features)
             category_specific = self.category_encoder(features)
         else:
