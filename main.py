@@ -40,14 +40,14 @@ def setup_experiment(opt, mode=None):
 def main(opt):
     if opt['experiment'] == 'baseline':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
-    elif  opt['experiment'] == 'baseline_domain_generalization':
-        experiment, train_loader, validation_loader, test_loader = setup_experiment(opt, mode='DG')
     elif opt['experiment'] == 'domain_disentangle':
         experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt)
-    elif opt['experiment'] == 'domain_disentangle_domain_generalization':
-        experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt, mode='DG')
     elif opt['experiment'] == 'clip_disentangle':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
+    elif  opt['experiment'] == 'baseline_domain_generalization':
+        experiment, train_loader, validation_loader, test_loader = setup_experiment(opt, mode='DG')
+    elif opt['experiment'] == 'domain_disentangle_domain_generalization':
+        experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt, mode='DG')
     elif opt['experiment'] == 'clip_disentangle_domain_generalization':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt, mode='DG')
 
