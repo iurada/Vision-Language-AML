@@ -12,23 +12,27 @@ def setup_experiment(opt, mode=None):
     if opt['experiment'] == 'baseline':
         experiment = BaselineExperiment(opt)
         train_loader, validation_loader, test_loader = build_splits_baseline(opt)
-        return experiment, train_loader, validation_loader, test_loader
-        
+        return experiment, train_loader, validation_loader, test_loader      
     elif opt['experiment'] == 'domain_disentangle':
         experiment = DomainDisentangleExperiment(opt)
         train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = build_splits_domain_disentangle(opt)
         return experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader
-
     elif opt['experiment'] == 'clip_disentangle':
         experiment = CLIPDisentangleExperiment(opt)
         train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt)
         return experiment, train_loader, validation_loader, test_loader
-
     elif opt['experiment'] == 'baseline_domain_generalization':
         experiment = BaselineExperiment(opt)
         train_loader, validation_loader, test_loader = build_splits_baseline(opt, mode)
         return experiment, train_loader, validation_loader, test_loader
-
+    elif opt['experiment'] == 'domain_disentangle_domain_generalization':
+        experiment = DomainDisentangleExperiment(opt)
+        train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = build_splits_domain_disentangle(opt, mode)
+        return experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader
+    elif opt['experiment'] == 'clip_disentangle_domain_generalization':
+        experiment = CLIPDisentangleExperiment(opt)
+        train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt, mode)
+        return experiment, train_loader, validation_loader, test_loader
     else:
         raise ValueError('Experiment not yet supported.')
     
@@ -40,8 +44,12 @@ def main(opt):
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt, mode='DG')
     elif opt['experiment'] == 'domain_disentangle':
         experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt)
+    elif opt['experiment'] == 'domain_disentangle_domain_generalization':
+        experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt, mode='DG')
     elif opt['experiment'] == 'clip_disentangle':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
+    elif opt['experiment'] == 'clip_disentangle_domain_generalization':
+        experiment, train_loader, validation_loader, test_loader = setup_experiment(opt, mode='DG')
 
     if not opt['test']: # Skip training if '--test' flag is set
         iteration = 0
