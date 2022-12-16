@@ -89,7 +89,7 @@ def main(opt):
             logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             
-        elif opt['experiment'] == 'domain_disentangle':
+        elif opt['experiment'] == 'domain_disentangle' or opt['experiment'] == 'domain_disentangle_domain_generalization':
             print('Train loop with source')
             # Train loop with source
             while iteration < opt['max_iterations']:
@@ -141,7 +141,7 @@ def main(opt):
             logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
 
-        elif opt['experiment'] == 'clip_disentangle':
+        elif opt['experiment'] == 'clip_disentangle' or opt['experiment'] == 'clip_disentangle_domain_generalization':
             print('Train loop with source')
             # Train loop with source
             while iteration < opt['max_iterations']:
