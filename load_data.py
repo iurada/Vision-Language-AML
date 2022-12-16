@@ -27,34 +27,62 @@ class PACSDatasetBaseline(Dataset):
         x = self.transform(Image.open(img_path).convert('RGB'))
         return x, y
 
-def read_lines(data_path, domain_name):
+def read_lines(data_path, domain_name, mode=None):
     examples = {}
-    with open(f'./Vision-Language-AML/{data_path}/{domain_name}.txt') as f:
-        lines = f.readlines()
+    if mode == None:
+        with open(f'./Vision-Language-AML/{data_path}/{domain_name}.txt') as f:
+            lines = f.readlines()
 
-    for line in lines: 
-        main_folder = './Vision-Language-AML/'
-        local_folder = '/kfold/'
-        line = line.strip().split()[0].split('/')
-        category_name = line[3]
-        category_idx = CATEGORIES[category_name]
-        image_name = line[4]
-        # image_path_zzz = f'./Vision-Language-AML/{data_path}/{domain_name}/{category_name}/{image_name}'
-        # print(f'{line}, image_path_zzz {image_path_zzz}, image_name {image_name}, category_name {category_name}, category_idx {category_idx}')
-        image_path = f'{main_folder}{data_path}{local_folder}{domain_name}/{category_name}/{image_name}'
-        if category_idx not in examples.keys():
-            examples[category_idx] = [image_path]
-        else:
-            examples[category_idx].append(image_path)
-        
+        for line in lines: 
+            main_folder = './Vision-Language-AML/'
+            local_folder = '/kfold/'
+            line = line.strip().split()[0].split('/')
+            category_name = line[3]
+            category_idx = CATEGORIES[category_name]
+            image_name = line[4]
+            # image_path_zzz = f'./Vision-Language-AML/{data_path}/{domain_name}/{category_name}/{image_name}'
+            # print(f'{line}, image_path_zzz {image_path_zzz}, image_name {image_name}, category_name {category_name}, category_idx {category_idx}')
+            image_path = f'{main_folder}{data_path}{local_folder}{domain_name}/{category_name}/{image_name}'
+            if category_idx not in examples.keys():
+                examples[category_idx] = [image_path]
+            else:
+                examples[category_idx].append(image_path)
+    else:
+        for source in domain_name:
+            with open(f'./Vision-Language-AML/{data_path}/{source}.txt') as f:
+                lines = f.readlines()
+
+            for line in lines: 
+                main_folder = './Vision-Language-AML/'
+                local_folder = '/kfold/'
+                line = line.strip().split()[0].split('/')
+                category_name = line[3]
+                category_idx = CATEGORIES[category_name]
+                image_name = line[4]
+                # image_path_zzz = f'./Vision-Language-AML/{data_path}/{domain_name}/{category_name}/{image_name}'
+                # print(f'{line}, image_path_zzz {image_path_zzz}, image_name {image_name}, category_name {category_name}, category_idx {category_idx}')
+                image_path = f'{main_folder}{data_path}{local_folder}{domain_name}/{category_name}/{image_name}'
+                if category_idx not in examples.keys():
+                    examples[category_idx] = [image_path]
+                else:
+                    examples[category_idx].append(image_path)
+
     return examples
 
-def build_splits_baseline(opt):
-    source_domain = 'art_painting'
-    target_domain = opt['target_domain']
+def build_splits_baseline(opt, mode=None):
+    
+    if mode == None:
+        source_domain = 'art_painting'
+        target_domain = opt['target_domain']
 
-    source_examples = read_lines(opt['data_path'], source_domain)
-    target_examples = read_lines(opt['data_path'], target_domain)
+        source_examples = read_lines(opt['data_path'], source_domain)
+        target_examples = read_lines(opt['data_path'], target_domain)
+    else:
+         choices=['art_painting', 'cartoon', 'sketch', 'photo']
+         target_domain = opt['target_domain']
+         source_domains = [x for x in choices if x!=target_domain]
+         source_examples = read_lines(opt['data_path'], source_domains, mode)
+         target_examples = read_lines(opt['data_path'], target_domain)
 
     # Compute ratios of examples for each category
     source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}

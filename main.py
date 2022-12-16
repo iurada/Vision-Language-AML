@@ -7,7 +7,7 @@ from experiments.domain_disentangle import DomainDisentangleExperiment
 from experiments.clip_disentangle import CLIPDisentangleExperiment
 
 
-def setup_experiment(opt):
+def setup_experiment(opt, mode=None):
     
     if opt['experiment'] == 'baseline':
         experiment = BaselineExperiment(opt)
@@ -22,15 +22,22 @@ def setup_experiment(opt):
     elif opt['experiment'] == 'clip_disentangle':
         experiment = CLIPDisentangleExperiment(opt)
         train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt)
+        return experiment, train_loader, validation_loader, test_loader
+
+    elif opt['experiment'] == 'baseline_domain_generalization':
+        experiment = BaselineExperiment(opt)
+        train_loader, validation_loader, test_loader = build_splits_baseline(opt, mode)
+        return experiment, train_loader, validation_loader, test_loader
 
     else:
         raise ValueError('Experiment not yet supported.')
     
-    return experiment, train_loader, validation_loader, test_loader
 
 def main(opt):
     if opt['experiment'] == 'baseline':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
+    elif  opt['experiment'] == 'baseline_domain_generalization':
+        experiment, train_loader, validation_loader, test_loader = setup_experiment(opt, mode='DG')
     elif opt['experiment'] == 'domain_disentangle':
         experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt)
     elif opt['experiment'] == 'clip_disentangle':
@@ -47,7 +54,7 @@ def main(opt):
         else:
             logging.info(opt)
 
-        if opt['experiment'] == 'baseline':
+        if opt['experiment'] == 'baseline' or opt['experiment'] == 'baseline_domain_generalization':
             # Train loop
             while iteration < opt['max_iterations']:
                 for data in train_loader:
