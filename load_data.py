@@ -61,7 +61,7 @@ def read_lines(data_path, domain_name, mode=None):
                 image_name = line[4]
                 # image_path_zzz = f'./Vision-Language-AML/{data_path}/{domain_name}/{category_name}/{image_name}'
                 # print(f'{line}, image_path_zzz {image_path_zzz}, image_name {image_name}, category_name {category_name}, category_idx {category_idx}')
-                image_path = f'{main_folder}{data_path}{local_folder}{domain_name}/{category_name}/{image_name}'
+                image_path = f'{main_folder}{data_path}{local_folder}{source}/{category_name}/{image_name}'
                 if category_idx not in examples.keys():
                     examples[category_idx] = [image_path]
                 else:
