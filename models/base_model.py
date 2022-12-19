@@ -79,6 +79,7 @@ class DomainDisentangleModel(nn.Module):
             nn.ReLU()
         )
         self.domain_classifier = nn.Linear(64, 2)
+        self.domain_classifier_DG = nn.Linear(64, 4)
         self.category_classifier = nn.Linear(64, 7)
         self.feature_reconstructor = nn.Sequential(
             nn.ReLU(),
@@ -94,7 +95,7 @@ class DomainDisentangleModel(nn.Module):
             nn.Linear(256, 512)
         )
 
-    def forward(self, x, label, experiment=None):
+    def forward(self, x, label, mode=None):
         # Feature extraction
         features = self.feature_extractor(x)
         # Disentanglement process
@@ -109,14 +110,29 @@ class DomainDisentangleModel(nn.Module):
         if label == 0:
             # Training with source
             category_class_ce = self.category_classifier(category_specific) # Minimize loss
-            domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
+
+            if mode == None:
+                domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
+            elif mode == 'DG':
+                domain_class_de = self.domain_classifier_DG(domain_specific) # Minimize loss
+
             category_class_de = self.category_classifier(domain_specific) # Maximize loss
-            domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
+
+            if mode == None:
+                domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
+            elif mode == 'DG':
+                domain_class_ce = self.domain_classifier_DG(category_specific) # Maximize loss
+
             reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific)) # Minimize loss
         elif label == 1:
             # Training with target
-            domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
-            domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
+            if mode == None:
+                domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
+                domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
+            elif mode == 'DG':
+                domain_class_ce = self.domain_classifier_DG(category_specific) # Maximize loss
+                domain_class_de = self.domain_classifier_DG(domain_specific) # Minimize loss
+                
             reconstructor = self.feature_reconstructor(domain_specific) # Minimize loss
         else:
             # Testing
@@ -125,16 +141,10 @@ class DomainDisentangleModel(nn.Module):
         # Return objects
         if label == 0:
             # Training with source
-            if experiment == None:
-                return reconstructor, features, category_class_ce, domain_class_de, category_class_de, domain_class_ce
-            else:
-                return reconstructor, features, category_class_ce, domain_class_de, category_class_de, domain_class_ce, domain_specific
+            return reconstructor, features, category_class_ce, domain_class_de, category_class_de, domain_class_ce
         elif label == 1:
             # Training with target
-            if experiment == None:
-                return reconstructor, features, domain_class_de, domain_class_ce
-            else:
-                return reconstructor, features, domain_class_de, domain_class_ce, domain_specific
+            return reconstructor, features, domain_class_de, domain_class_ce
         else:
             # Testing
             return category_class

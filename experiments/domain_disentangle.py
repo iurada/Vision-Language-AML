@@ -42,13 +42,13 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         return iteration, best_accuracy, total_train_loss
 
-    def train_iteration(self, data, label):
+    def train_iteration(self, data, label, mode=None):
         x, y, domain = data
         x = x.to(self.device)
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        results = self.model(x, label)
+        results = self.model(x, label, mode)
         if label == 0:
             # Training with source
             loss_1 = self.criterion_1(results[2], y)
