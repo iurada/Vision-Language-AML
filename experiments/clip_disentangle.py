@@ -20,12 +20,15 @@ class CLIPDisentangleExperiment:
         self.criterion_1 = torch.nn.CrossEntropyLoss()
         self.criterion_2 = torch.nn.MSELoss()
 
-    def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
+    def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss, train_phase):
         checkpoint = {}
 
         checkpoint['iteration'] = iteration
         checkpoint['best_accuracy'] = best_accuracy
-        checkpoint['total_train_loss'] = total_train_loss
+        if train_phase == 'source':
+            checkpoint['total_source_train_loss'] = total_train_loss
+        elif train_phase == 'target':
+            checkpoint['total_target_train__loss'] = total_train_loss
 
         checkpoint['model'] = self.model.state_dict()
         checkpoint['optimizer'] = self.optimizer.state_dict()
@@ -37,7 +40,7 @@ class CLIPDisentangleExperiment:
 
         iteration = checkpoint['iteration']
         best_accuracy = checkpoint['best_accuracy']
-        total_train_loss = checkpoint['total_train_loss']
+        total_train_loss = checkpoint['total_source_train_loss']
 
         self.model.load_state_dict(checkpoint['model'])
         self.optimizer.load_state_dict(checkpoint['optimizer'])

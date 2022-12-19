@@ -7,7 +7,7 @@ from experiments.domain_disentangle import DomainDisentangleExperiment
 from experiments.clip_disentangle import CLIPDisentangleExperiment
 
 
-def setup_experiment(opt, mode=None):
+def setup_experiment(opt):
     
     if opt['experiment'] == 'baseline':
         experiment = BaselineExperiment(opt)
@@ -21,35 +21,29 @@ def setup_experiment(opt, mode=None):
         experiment = CLIPDisentangleExperiment(opt)
         train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt)
         return experiment, train_loader, validation_loader, test_loader
-    elif opt['experiment'] == 'baseline_domain_generalization':
+    elif opt['experiment'] == 'baseline_DG':
         experiment = BaselineExperiment(opt)
-        train_loader, validation_loader, test_loader = build_splits_baseline(opt, mode)
+        train_loader, validation_loader, test_loader = build_splits_baseline(opt, mode='DG')
         return experiment, train_loader, validation_loader, test_loader
-    elif opt['experiment'] == 'domain_disentangle_domain_generalization':
+    elif opt['experiment'] == 'domain_disentangle_DG':
         experiment = DomainDisentangleExperiment(opt)
-        train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = build_splits_domain_disentangle(opt, mode)
+        train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = build_splits_domain_disentangle(opt, mode='DG')
         return experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader
-    elif opt['experiment'] == 'clip_disentangle_domain_generalization':
+    elif opt['experiment'] == 'clip_disentangle_DG':
         experiment = CLIPDisentangleExperiment(opt)
-        train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt, mode)
+        train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt, mode='DG')
         return experiment, train_loader, validation_loader, test_loader
     else:
         raise ValueError('Experiment not yet supported.')
     
 
 def main(opt):
-    if opt['experiment'] == 'baseline':
+    if opt['experiment'] == 'baseline' or opt['experiment'] == 'baseline_DG':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
-    elif opt['experiment'] == 'domain_disentangle':
+    elif opt['experiment'] == 'domain_disentangle' or opt['experiment'] == 'domain_disentangle_DG':
         experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt)
-    elif opt['experiment'] == 'clip_disentangle':
+    elif opt['experiment'] == 'clip_disentangle' or opt['experiment'] == 'clip_disentangle_DG':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
-    elif  opt['experiment'] == 'baseline_domain_generalization':
-        experiment, train_loader, validation_loader, test_loader = setup_experiment(opt, mode='DG')
-    elif opt['experiment'] == 'domain_disentangle_domain_generalization':
-        experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt, mode='DG')
-    elif opt['experiment'] == 'clip_disentangle_domain_generalization':
-        experiment, train_loader, validation_loader, test_loader = setup_experiment(opt, mode='DG')
 
     if not opt['test']: # Skip training if '--test' flag is set
         iteration = 0
@@ -62,7 +56,7 @@ def main(opt):
         else:
             logging.info(opt)
 
-        if opt['experiment'] == 'baseline' or opt['experiment'] == 'baseline_domain_generalization':
+        if opt['experiment'] == 'baseline' or opt['experiment'] == 'baseline_DG':
             # Train loop
             while iteration < opt['max_iterations']:
                 for data in train_loader:
@@ -89,7 +83,7 @@ def main(opt):
             logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             
-        elif opt['experiment'] == 'domain_disentangle' or opt['experiment'] == 'domain_disentangle_domain_generalization':
+        elif opt['experiment'] == 'domain_disentangle' or opt['experiment'] == 'domain_disentangle_DG':
             print('Train loop with source')
             # Train loop with source
             while iteration < opt['max_iterations']:
@@ -105,8 +99,8 @@ def main(opt):
                         val_accuracy, val_loss = experiment.validate(validation_loader_source, label=0)
                         print(f'[VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                         if val_accuracy > best_accuracy:
-                            experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss)
-                        experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
+                            experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss, train_phase='source')
+                        experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss, train_phase='source')
 
                     iteration += 1
                     if iteration > opt['max_iterations']:
@@ -129,8 +123,8 @@ def main(opt):
                         val_accuracy, val_loss = experiment.validate(validation_loader_target, label=1)
                         print(f'[VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                         if val_accuracy > best_accuracy:
-                            experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss)
-                        experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
+                            experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss, train_phase='target')
+                        experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss, train_phase='target')
 
                     iteration += 1
                     if iteration > opt['max_iterations']:
@@ -141,7 +135,7 @@ def main(opt):
             logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
 
-        elif opt['experiment'] == 'clip_disentangle' or opt['experiment'] == 'clip_disentangle_domain_generalization':
+        elif opt['experiment'] == 'clip_disentangle' or opt['experiment'] == 'clip_disentangle_DG':
             print('Train loop with source')
             # Train loop with source
             while iteration < opt['max_iterations']:
@@ -157,8 +151,8 @@ def main(opt):
                         val_accuracy, val_loss = experiment.validate(validation_loader_source, label=0)
                         print(f'[VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                         if val_accuracy > best_accuracy:
-                            experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss)
-                        experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
+                            experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss, train_phase='source')
+                        experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss, train_phase='source')
 
                     iteration += 1
                     if iteration > opt['max_iterations']:
@@ -181,8 +175,8 @@ def main(opt):
                         val_accuracy, val_loss = experiment.validate(validation_loader_target, label=1)
                         print(f'[VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                         if val_accuracy > best_accuracy:
-                            experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss)
-                        experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
+                            experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss, train_phase='target')
+                        experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss, train_phase='target')
 
                     iteration += 1
                     if iteration > opt['max_iterations']:

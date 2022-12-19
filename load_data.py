@@ -47,7 +47,7 @@ def read_lines(data_path, domain_name, mode=None):
                 examples[category_idx] = [image_path]
             else:
                 examples[category_idx].append(image_path)
-    else:
+    elif mode == 'DG':
         for source in domain_name:
             with open(f'./Vision-Language-AML/{data_path}/{source}.txt') as f:
                 lines = f.readlines()
@@ -77,7 +77,7 @@ def build_splits_baseline(opt, mode=None):
 
         source_examples = read_lines(opt['data_path'], source_domain)
         target_examples = read_lines(opt['data_path'], target_domain)
-    else:
+    elif mode == 'DG':
         choices=['art_painting', 'cartoon', 'sketch', 'photo']
         target_domain = opt['target_domain']
         source_domains = [x for x in choices if x!=target_domain]
@@ -155,7 +155,7 @@ def build_splits_domain_disentangle(opt, mode=None):
 
         source_examples = read_lines(opt['data_path'], source_domain)
         target_examples = read_lines(opt['data_path'], target_domain)
-    else:
+    elif mode == 'DG':
         choices=['art_painting', 'cartoon', 'sketch', 'photo']
         target_domain = opt['target_domain']
         source_domains = [x for x in choices if x!=target_domain]
@@ -245,7 +245,7 @@ def build_splits_clip_disentangle(opt, mode=None):
 
         source_examples = read_lines(opt['data_path'], source_domain)
         target_examples = read_lines(opt['data_path'], target_domain)
-    else:
+    elif mode == 'DG':
         choices=['art_painting', 'cartoon', 'sketch', 'photo']
         target_domain = opt['target_domain']
         source_domains = [x for x in choices if x!=target_domain]
