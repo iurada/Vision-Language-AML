@@ -25,11 +25,6 @@ class DomainDisentangleExperiment: # See point 2. of the project
         checkpoint['iteration'] = iteration
         checkpoint['best_accuracy'] = best_accuracy
         checkpoint['total_train_loss'] = total_train_loss
-        # if train_phase == 'source':
-            # checkpoint['total_source_train_loss'] = total_train_loss
-        # elif train_phase == 'target':
-            # checkpoint['total_target_train__loss'] = total_train_loss
-
         checkpoint['model'] = self.model.state_dict()
         checkpoint['optimizer'] = self.optimizer.state_dict()
 
