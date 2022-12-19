@@ -99,7 +99,7 @@ def build_splits_baseline(opt, mode=None):
     for category_idx, examples_list in source_examples.items():
         split_idx = round(source_category_ratios[category_idx] * val_split_length)
         for i, example in enumerate(examples_list):
-            if i < split_idx:
+            if i > split_idx:
                 train_examples.append([example, category_idx]) # each pair is [path_to_img, class_label]
             else:
                 val_examples.append([example, category_idx]) # each pair is [path_to_img, class_label]
@@ -182,7 +182,7 @@ def build_splits_domain_disentangle(opt, mode=None):
     for category, example_list in source_examples.items():
         split_idx = round(source_category_ratios[category] * val_split_length_1)
         for i, example in enumerate(example_list):
-            if i < split_idx:
+            if i > split_idx:
                 train_examples_source.append([example, category, 0]) # each pair is [path_to_img, class_label]
             else:
                 val_examples_both.append([example, category, 0]) # each pair is [path_to_img, class_label]
@@ -190,8 +190,8 @@ def build_splits_domain_disentangle(opt, mode=None):
     # Train and Val from domain -> only domain encoder + domain clf
     for category, example_list in target_examples.items():
         split_idx = round(source_category_ratios[category] * val_split_length_2)
-        for example in example_list:
-            if i < split_idx:
+        for i, example in enumerate(example_list):
+            if i > split_idx:
                 train_examples_for_dclf.append([example, category, 1])
             else:
                 val_examples_dclf.append([example, category, 1])
@@ -272,7 +272,7 @@ def build_splits_clip_disentangle(opt, mode=None):
     for category, example_list in source_examples.items():
         split_idx = round(source_category_ratios[category] * val_split_length_1)
         for i, example in enumerate(example_list):
-            if i < split_idx:
+            if i > split_idx:
                 train_examples_source.append([example, category, 0]) # each pair is [path_to_img, class_label]
             else:
                 val_examples_both.append([example, category, 0]) # each pair is [path_to_img, class_label]
@@ -280,8 +280,8 @@ def build_splits_clip_disentangle(opt, mode=None):
     # Train and Val from domain -> only domain encoder + domain clf
     for category, example_list in target_examples.items():
         split_idx = round(source_category_ratios[category] * val_split_length_2)
-        for example in example_list:
-            if i < split_idx:
+        for i, example in enumerate(example_list):
+            if i > split_idx:
                 train_examples_for_dclf.append([example, category, 1])
             else:
                 val_examples_dclf.append([example, category, 1])

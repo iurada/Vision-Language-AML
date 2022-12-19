@@ -91,7 +91,7 @@
         "precise lines",
         "high saturation, light reflection",
         "single instance",
-        "colorless",
+        "colorful",
         "without text",
         "with texture",
         "with perspective",
@@ -119,7 +119,7 @@
         "medium precise lines",
         "high saturation, light reflection",
         "single instance",
-        "colorless",
+        "colorful",
         "without text",
         "with texture",
         "with perspective",
@@ -160,7 +160,7 @@
         "high level details",
         "imprecise lines",
         "high saturation, light reflection",
-        "colorless",
+        "colorful",
         "single instance",
         "without text",
         "white shade",
@@ -174,7 +174,7 @@
         "high level details",
         "precise lines",
         "high saturation, light reflection",
-        "colorless",
+        "colorful",
         "single instance",
         "without text",
         "with texture",
@@ -203,7 +203,7 @@
         "low level details",
         "precise lines",
         "high saturation, light reflection",
-        "colorless",
+        "colorful",
         "single instance",
         "without text",
         "with texture",
@@ -217,7 +217,7 @@
         "low level details",
         "imprecise lines",
         "low saturation, no light reflection",
-        "colorless",
+        "colorful",
         "single instance",
         "without text",
         "with texture",
@@ -245,7 +245,7 @@
         "high level details",
         "precise lines",
         "low saturation, no light reflection",
-        "colorless",
+        "colorful",
         "without text",
         "without texture",
         "with low perspective",
@@ -273,7 +273,7 @@
         "white shade",
         "precise lines",
         "high saturation, light reflection",
-        "colorless",
+        "colorful",
         "lot of edges",
         "without text",
         "with perspective",
@@ -302,7 +302,7 @@
         "with low perspective",
         "few precise line",
         "low saturation, no light reflection",
-        "colorless",
+        "colorful",
         "without text",
         "without texture",
         "green, grass",
@@ -358,7 +358,7 @@
         "shadows",
         "unrealistic",
         "single instance",
-        "three, grass, white",
+        "tree, grass, white",
         "with low texture",
         "with perspective",
         "without text",
@@ -395,7 +395,7 @@
     "image_name": "photo/elephant/n02503517_8137.jpg",
     "descriptions": [
         "low level details",
-        "colorless",
+        "colorful",
         "gray, white",
         "without perspective",
         "without text",
@@ -409,7 +409,7 @@
     "descriptions": [
         "high level details",
         "gray",
-        "colorless",
+        "colorful",
         "with low perspective",
         "without texture",
         "without text",
@@ -422,7 +422,7 @@
     "image_name": "photo/elephant/n02503517_6624.jpg",
     "descriptions": [
         "low level details",
-        "colorless",
+        "colorful",
         "without text",
         "without texture",
         "with low perspective",
@@ -442,7 +442,7 @@
         "without text",
         "without texture",
         "with perspective",
-        "colorless"
+        "colorful"
     ]
 },
 {
@@ -490,7 +490,7 @@
     "descriptions": [
         "mid-level deatils",
         "high saturation, light reflection",
-        "colorless",
+        "colorful",
         "realistic",
         "without relevant text",
         "without texture",
@@ -504,7 +504,7 @@
     "descriptions": [
         "mid-level details",
         "white background",
-        "colorless",
+        "colorful",
         "single instance",
         "realistic",
         "without perspective",
@@ -516,67 +516,185 @@
 {
     "image_name": "photo/giraffe/n02439033_10541.jpg",
     "descriptions": [
-        
+        "high level details",
+        "colorful",
+        "with perspective",
+        "low saturation, no light reflection",
+        "without text",
+        "without texture",
+        "realistic",
+        "single instance",
+        "smooth background"
     ]
 },
 {
     "image_name": "photo/giraffe/084_0053.jpg",
     "descriptions": [
+        "mid-level deatils",
+        "realistic",
+        "mid saturation, light reflection",
+        "with low texture",
+        "with perspective",
+        "single instance",
+        "without text",
+        "yellow, green",
+        "colorful"
     ]
 },
 {
     "image_name": "photo/giraffe/084_0029.jpg",
     "descriptions": [
+        "low level details",
+        "high saturation, no light reflection",
+        "multiple instances",
+        "colorful",
+        "smooth background",
+        "with perspective",
+        "with low texture",
+        "without text",
+        "orange"
     ]
 },
 {
     "image_name": "photo/giraffe/n02439033_10803.jpg",
     "descriptions": [
+        "high level details",
+        "unrealistic",
+        "with perspective",
+        "without texture",
+        "without text",
+        "single instance",
+        "trees",
+        "mid saturation, no light reflection",
+        "colorful"
+
     ]
 },
 {
     "image_name": "photo/giraffe/n02439033_15005.jpg",
     "descriptions": [
+        "mid-level deatils",
+        "high saturation, light reflection",
+        "colorful",
+        "realistic",
+        "without text",
+        "with low texture",
+        "with low perspective",
+        "single instance",
+        "trees"
     ]
 },
 {
     "image_name": "photo/giraffe/084_0014.jpg",
     "descriptions": [
+        "mid-level deatils",
+        "mid saturation, light reflection",
+        "colorful",
+        "smooth",
+        "with low perspective",
+        "without texture",
+        "without text",
+        "single instance",
+        "realistic"
     ]
 },
 {
     "image_name": "photo/horse/n02374451_503.jpg",
     "descriptions": [
+        "high level details",
+        "single instance",
+        "with low perspective",
+        "without text",
+        "without texture",
+        "white",
+        "with human",
+        "colorful",
+        "realistic",
+        "low saturation, no light reflection"
     ]
 },
 {
     "image_name": "photo/horse/n02374451_597.jpg",
     "descriptions": [
+        "high level details",
+        "colorful",
+        "definite, precise lines",
+        "single instance",
+        "with perspective",
+        "without text",
+        "without texture",
+        "realistic",
+        "low saturation, no light reflection"
     ]
 },
 {
     "image_name": "photo/horse/105_0089.jpg",
     "descriptions": [
+        "high level details",
+        "colorful",
+        "single instance",
+        "with perspective",
+        "realistic",
+        "brown",
+        "without text",
+        "without texture",
+        "low saturation, no light reflection"
     ]
 },
 {
     "image_name": "photo/horse/105_0123.jpg",
     "descriptions": [
+        "mid-level deatils",
+        "unrealistic",
+        "colorless",
+        "black, white",
+        "single instance",
+        "without relevant text",
+        "with low texture",
+        "without perspective"
     ]
 },
 {
     "image_name": "photo/horse/105_0210.jpg",
     "descriptions": [
+        "mid-level deatils",
+        "colorful",
+        "without texture",
+        "without text",
+        "single instance",
+        "grid",
+        "with low perspective",
+        "brown",
+        "low saturation, light reflection",
+        "realistic"
     ]
 },
 {
     "image_name": "photo/horse/n02374451_2743.jpg",
     "descriptions": [
+        "low level details",
+        "colorful",
+        "in action",
+        "without text",
+        "with low texture",
+        "high saturation, light reflection",
+        "with perspective",
+        "single instance",
+        "realistic"
     ]
 },
 {
     "image_name": "photo/dog/n02109525_16346.jpg",
     "descriptions": [
+        "mid-level deatils",
+        "high saturation, light reflection",
+        "single instance",
+        "white, brown",
+        "without text",
+        "without texture",
+        "with low perspective",
+        "realistic",
+        "colorful"
     ]
 }
 ]
