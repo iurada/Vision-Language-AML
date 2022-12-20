@@ -194,10 +194,6 @@ def build_splits_domain_disentangle(opt, mode=None):
         train_examples_2 = []
         test_examples = []
 
-        temp = list(zip(source_examples, target_examples))
-        random.shuffle(temp)
-        source_examples, target_examples = zip(*temp)
-
         for category, example_list in source_examples.items():
             for example in example_list:
                 train_examples_1.append([example, category, 0])
@@ -206,6 +202,11 @@ def build_splits_domain_disentangle(opt, mode=None):
             for example in example_list:
                 train_examples_2.append([example, category, 1])
                 test_examples.append([example, category, 1])
+
+        temp = list(zip(train_examples_1, train_examples_2, test_examples))
+        random.shuffle(temp)
+        train_examples_1, train_examples_2, test_examples = zip(*temp)
+        train_examples_1, train_examples_2, test_examples = list(train_examples_1), list(train_examples_2), list(test_examples)
 
     elif mode == 'DG':
         choices=['art_painting', 'cartoon', 'sketch', 'photo']
@@ -230,6 +231,11 @@ def build_splits_domain_disentangle(opt, mode=None):
             for example in example_list:
                 train_examples_2.append([example, category, domain])
                 test_examples.append([example, category, domain])
+                
+        temp = list(zip(train_examples_1, train_examples_2, test_examples))
+        random.shuffle(temp)
+        train_examples_1, train_examples_2, test_examples = zip(*temp)
+        train_examples_1, train_examples_2, test_examples = list(train_examples_1), list(train_examples_2), list(test_examples)
 
     # Train and Val from source -> both domain encoder + domain clf and category encoder + category clf
     train_examples_source = train_examples_1[0:round(0.8*len(train_examples_1))]
