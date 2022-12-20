@@ -207,16 +207,12 @@ def build_splits_domain_disentangle(opt, mode=None):
         choices=['art_painting', 'cartoon', 'sketch', 'photo']
         target_domain = opt['target_domain']
         source_domains = [x for x in choices if x!=target_domain]
-        source_examples = read_lines(opt['data_path'], source_domains, mode)
-        target_examples = read_lines(opt['data_path'], target_domain)
+        source_examples = read_lines_DG(opt['data_path'], source_domains, mode)
+        target_examples = read_lines_DG(opt['data_path'], target_domain, mode)
 
         train_examples_1 = []
         train_examples_2 = []
         test_examples = []
-
-        temp = list(zip(source_examples, target_examples))
-        random.shuffle(temp)
-        source_examples, target_examples = zip(*temp)
 
         for category, example_list, domain in source_examples.items():
             for example in example_list:
