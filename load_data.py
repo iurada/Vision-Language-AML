@@ -117,7 +117,7 @@ def build_splits_baseline(opt, mode=None):
         target_domain = opt['target_domain']
         source_domains = [x for x in choices if x!=target_domain]
         source_examples = read_lines_DG(opt['data_path'], source_domains)
-        target_examples = read_lines_DG(opt['data_path'], target_domain)
+        target_examples = read_lines_DG(opt['data_path'], [target_domain])
 
         # Compute ratios of examples for each category
         source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list[0] in source_examples.items()}
@@ -208,20 +208,20 @@ def build_splits_domain_disentangle(opt, mode=None):
         target_domain = opt['target_domain']
         source_domains = [x for x in choices if x!=target_domain]
         source_examples = read_lines_DG(opt['data_path'], source_domains)
-        target_examples = read_lines_DG(opt['data_path'], target_domain)
+        target_examples = read_lines_DG(opt['data_path'], [target_domain])
 
         train_examples_1 = []
         train_examples_2 = []
         test_examples = []
 
-        for category, example_list, domain in source_examples.items():
-            for example in example_list:
-                train_examples_1.append([example, category, domain])
+        for category, path_domain in source_examples.items():
+            for path, domain in path_domain:
+                train_examples_1.append([path, category, domain])
         
-        for category, example_list, domain in target_examples.items():
-            for example in example_list:
-                train_examples_2.append([example, category, domain])
-                test_examples.append([example, category, domain])
+        for category, path_domain in target_examples.items():
+            for path_domain in path_domain:
+                train_examples_2.append([path, category, domain])
+                test_examples.append([path, category, domain])
 
     # Train and Val from source -> both domain encoder + domain clf and category encoder + category clf
     train_examples_source = train_examples_1[0:round(0.8*len(train_examples_1))]
