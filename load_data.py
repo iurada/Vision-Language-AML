@@ -207,8 +207,8 @@ def build_splits_domain_disentangle(opt, mode=None):
         choices=['art_painting', 'cartoon', 'sketch', 'photo']
         target_domain = opt['target_domain']
         source_domains = [x for x in choices if x!=target_domain]
-        source_examples = read_lines_DG(opt['data_path'], source_domains, mode)
-        target_examples = read_lines_DG(opt['data_path'], target_domain, mode)
+        source_examples = read_lines_DG(opt['data_path'], source_domains)
+        target_examples = read_lines_DG(opt['data_path'], target_domain)
 
         train_examples_1 = []
         train_examples_2 = []
