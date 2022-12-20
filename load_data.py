@@ -194,6 +194,10 @@ def build_splits_domain_disentangle(opt, mode=None):
         train_examples_2 = []
         test_examples = []
 
+        temp = list(zip(source_examples, target_examples))
+        random.shuffle(temp)
+        source_examples, target_examples = zip(*temp)
+
         for category, example_list in source_examples.items():
             for example in example_list:
                 train_examples_1.append([example, category, 0])
@@ -202,16 +206,6 @@ def build_splits_domain_disentangle(opt, mode=None):
             for example in example_list:
                 train_examples_2.append([example, category, 1])
                 test_examples.append([example, category, 1])
-
-        # Train and Val from source -> both domain encoder + domain clf and category encoder + category clf
-        random.shuffle(train_examples_1)
-        train_examples_source = train_examples_1[0:round(0.8*len(train_examples_1))]
-        val_examples_both = train_examples_1[round(0.8*len(train_examples_1)):]
-
-        # Train and Val from domain -> only domain encoder + domain clf
-        random.shuffle(train_examples_2)
-        train_examples_domain = train_examples_2[0:round(0.8*len(train_examples_2))]
-        val_examples_domain = train_examples_2[round(0.8*len(train_examples_2)):]
 
     elif mode == 'DG':
         choices=['art_painting', 'cartoon', 'sketch', 'photo']
@@ -224,6 +218,10 @@ def build_splits_domain_disentangle(opt, mode=None):
         train_examples_2 = []
         test_examples = []
 
+        temp = list(zip(source_examples, target_examples))
+        random.shuffle(temp)
+        source_examples, target_examples = zip(*temp)
+
         for category, example_list, domain in source_examples.items():
             for example in example_list:
                 train_examples_1.append([example, category, domain])
@@ -233,15 +231,13 @@ def build_splits_domain_disentangle(opt, mode=None):
                 train_examples_2.append([example, category, domain])
                 test_examples.append([example, category, domain])
 
-        # Train and Val from source -> both domain encoder + domain clf and category encoder + category clf
-        random.shuffle(train_examples_1)
-        train_examples_source = train_examples_1[0:round(0.8*len(train_examples_1))]
-        val_examples_both = train_examples_1[round(0.8*len(train_examples_1)):]
+    # Train and Val from source -> both domain encoder + domain clf and category encoder + category clf
+    train_examples_source = train_examples_1[0:round(0.8*len(train_examples_1))]
+    val_examples_both = train_examples_1[round(0.8*len(train_examples_1)):]
 
-        # Train and Val from domain -> only domain encoder + domain clf
-        random.shuffle(train_examples_2)
-        train_examples_domain = train_examples_2[0:round(0.8*len(train_examples_2))]
-        val_examples_domain = train_examples_2[round(0.8*len(train_examples_2)):]
+    # Train and Val from domain -> only domain encoder + domain clf
+    train_examples_domain = train_examples_2[0:round(0.8*len(train_examples_2))]
+    val_examples_domain = train_examples_2[round(0.8*len(train_examples_2)):]
 
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
