@@ -41,10 +41,115 @@
     ]
 }
 ]
-
 [
 {
-    
-}
+    "image_name": "art_painting/horse/pic_147.jpg",
+    "descriptions":[
+        "mid-level detailed, intricate",
+        "few precise lines",
+        "low saturation",
+        "colorless, white, black, grey, blurred",
+        "without test",
+        "painting strokes",
+        "single instance",
+        "with low texture",
+        "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/horse/pic_052.jpg",
+    "descriptions":[
+        "mid-level detailed, intricate",
+        "few precise lines",
+        "intense saturation",
+        "colorful, white, brown, black",
+        "single instance",
+        "with texture",
+        "without text",
+        "painting strokes",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/horse/pic_223.jpg",
+    "descriptions":[
+        "low-level details, intricate",
+        "few precise lines",
+        "intense saturation",
+        "colorful, blue, green, yellow",
+        "multiple instances",
+        "with texture",
+        "without text",
+        "painting strokes",
+        "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/horse/pic_071.jpg",
+    "descriptions":[
+        "mid-level details",
+        "few precise lines",
+        "low saturation",
+        "colorful, brown, blue",
+        "single instance",
+        "with no relevant text",
+        "with low texture",
+        "pencil strokes",
+        "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/horse/pic_120.jpg"
+    "descriptions":[
+        "high level details",
+        "precise lines",
+        "low saturation",
+        "colorful, blue, brown",
+        "single instance",
+        "with no relevant text",
+        "without texture",
+        "painting strokes",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/horse/pic_017.jpg",
+    "descriptions":[
+        "mid-level details",
+        "precise lines",
+        "low saturation",
+        "colorful, white, brown, black",
+        "without background",
+        "multiple instances",
+        "without test",
+        "without texture",
+        "pencil strokes",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/horse/pic_014.jpg"
+    "descriptions":[
+
+    ]
+},
+{
+    "image_name": "art_painting/horse/pic_057.jpg"
+    "descriptions":[
+
+    ]
+},
+{
+    "image_name": "art_painting/horse/pic_036.jpg"
+    "descriptions":[
+
+    ]
+},
+{
+    "image_name": "art_painting/horse/pic_043.jpg"
+    "descriptions":[
+
+    ]
+},
 ]
 
