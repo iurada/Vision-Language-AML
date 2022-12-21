@@ -69,7 +69,7 @@ import clip
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 clip_model, _ = clip.load('ViT-B/32', device='cpu') # load it first to CPU to ensure you're using fp32 precision.
-clip_model.to(device)
+clip_model = clip_model.to(device)
 clip_model.eval()
 for param in clip_model.parameters():
     param.requires_grad = False
