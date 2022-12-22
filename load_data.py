@@ -186,6 +186,11 @@ def build_splits_domain_disentangle(opt):
         else:
             val_examples_target.append([parameters[0], parameters[1], parameters[2]])
 
+    print(f'Train_example source {train_examples_source[0]} {len(train_examples_source)}')
+    print(f'Train_example target {train_examples_target[0]} {len(train_examples_target)}')
+    print(f'Val_example source {val_examples_source[0]} {len(val_examples_source)}')
+    print(f'Val_example target {val_examples_target[0]} {len(val_examples_target)}')
+
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
 
