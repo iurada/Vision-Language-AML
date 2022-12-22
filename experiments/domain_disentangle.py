@@ -101,7 +101,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
                     _, _, domain_class, _ = self.model(x, label)
                     loss += self.criterion_1(domain_class, domain)
                     pred = torch.argmax(domain_class, dim=-1)
-                    accuracy += (pred == y).sum().item()
+                    accuracy += (pred == domain).sum().item()
                     count += x.size(0)
                 else:
                     # Testing
