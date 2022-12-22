@@ -71,7 +71,7 @@ def build_splits_baseline(opt):
     for category_idx, examples_list in source_examples.items():
         split_idx = round(source_category_ratios[category_idx] * val_split_length)
         for i, example in enumerate(examples_list):
-            if i < split_idx:
+            if i > split_idx:
                 train_examples.append([example, category_idx]) # each pair is [path_to_img, class_label]
             else:
                 val_examples.append([example, category_idx]) # each pair is [path_to_img, class_label]
@@ -126,26 +126,44 @@ def build_splits_domain_disentangle(opt):
     source_examples = read_lines(opt['data_path'], source_domain)
     target_examples = read_lines(opt['data_path'], target_domain)
 
+    # Compute ratios of examples for each category
+    source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
+    source_total_examples = sum(source_category_ratios.values())
+    source_category_ratios = {category_idx: c / source_total_examples for category_idx, c in source_category_ratios.items()}
+
+    # Build splits - we train only on the source domain (Art Painting)
+    source_val_split_length = source_total_examples * 0.2 # 20% of the training split used for validation
+
+    # Compute ratios of examples for each category
+    target_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in target_examples.items()}
+    target_total_examples = sum(target_category_ratios.values())
+    target_category_ratios = {category_idx: c / target_total_examples for category_idx, c in target_category_ratios.items()}
+
+    # Build splits - we train only on the target domain (Art Painting)
+    target_val_split_length = target_total_examples * 0.2 # 20% of the training split used for validation
+
     train_examples_source = []
-    train_examples_for_dclf = []
+    val_examples_source = []
+    train_examples_target = []
+    val_examples_target = []
     test_examples = []
 
     for category, example_list in source_examples.items():
-        for example in example_list:
-            train_examples_source.append([example, category, 0])
+        split_idx = round(source_category_ratios[category] * source_val_split_length)
+        for i, example in enumerate(example_list):
+            if i > split_idx:
+                train_examples_source.append([example, category, 0])
+            else:
+                val_examples_source.append([example, category, 0])
     
     for category, example_list in target_examples.items():
-        for example in example_list:
-            train_examples_for_dclf.append([example, category, 1])
+        split_idx = round(target_category_ratios[category] * target_val_split_length)
+        for i, example in enumerate(example_list):
+            if i > split_idx:
+                train_examples_target.append([example, category, 1])
+            else:
+                val_examples_target.append([example, category, 1])
             test_examples.append([example, category, 1])
-
-    # Train and Val from source -> both domain encoder + domain clf and category encoder + category clf
-    train_examples_1 = train_examples_source[0:round(0.8*len(train_examples_source))]
-    val_examples_both = train_examples_source[round(0.8*len(train_examples_source)):]
-
-    # Train and Val from domain -> only domain encoder + domain clf
-    train_examples_2 = train_examples_for_dclf[0:round(0.8*len(train_examples_for_dclf))]
-    val_examples_dclf = train_examples_for_dclf[round(0.8*len(train_examples_for_dclf)):]
 
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
@@ -166,10 +184,10 @@ def build_splits_domain_disentangle(opt):
     ])
 
     # Dataloaders
-    train_loader_1 = DataLoader(PACSDatasetDomainDisentangle(train_examples_1, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True) 
-    train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples_2, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    val_loader_1 = DataLoader(PACSDatasetDomainDisentangle(val_examples_both, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
-    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples_dclf, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    train_loader_1 = DataLoader(PACSDatasetDomainDisentangle(train_examples_source, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True) 
+    train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples_target, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+    val_loader_1 = DataLoader(PACSDatasetDomainDisentangle(val_examples_source, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples_target, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
     test_loader = DataLoader(PACSDatasetDomainDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
 
     return train_loader_1, train_loader_2, val_loader_1, val_loader_2, test_loader
