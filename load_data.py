@@ -227,7 +227,7 @@ def readJSON(domains):
     return a dictionary with image paths as keys and image descriptions as values
     '''
 
-    with open("./data/LabeledPACS/Labeled PACS/descriptions.json") as file:
+    with open("./data/LabeledPACS/descriptions.json") as file:
         #print(file.read())
         data = json.loads(file.read())
 
