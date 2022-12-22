@@ -156,8 +156,13 @@ def build_splits_domain_disentangle(opt):
 
     train_examples_temp = train_examples_source + train_examples_target
 
-    # Compute ratios of examples for each category
-    target_category_ratios = {domain: len(examples_list) for _, examples_list, domain in train_examples_temp}
+    # Compute ratios of examples for each domain
+    target_category_ratios = {
+        '0': 0,
+        '1': 1,
+    }
+    for _, _, domain in train_examples_temp:
+        target_category_ratios[domain] += 1
     target_total_examples = sum(target_category_ratios.values())
     target_category_ratios = {domain: c / target_total_examples for domain, c in target_category_ratios.items()}
 
