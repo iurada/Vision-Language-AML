@@ -128,6 +128,7 @@ def build_splits_domain_disentangle(opt):
 
     print(f'Source cat len {[(k, len(v)) for k,v in source_examples.items()]}')
     print(f'Target cat len {[(k, len(v)) for k,v in target_examples.items()]}')
+
     # Compute ratios of examples for each category
     source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
     source_total_examples = sum(source_category_ratios.values())
@@ -143,6 +144,9 @@ def build_splits_domain_disentangle(opt):
         0: tot_source/(tot_source+tot_target),
         1: tot_target/(tot_source+tot_target),
     } 
+
+    print(f'Dictionary {source_category_ratios}')
+    print(f'Dictionary {domain_ratios}')
     
     domain_val_split_length = (tot_source+tot_target)*0.2
 
