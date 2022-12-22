@@ -150,8 +150,10 @@ def build_splits_domain_disentangle(opt):
     
     for category, example_list in target_examples.items():
         for example in example_list:
-            train_examples_target.append([example, category, 1])
+            train_examples_t.append([example, category, 1])
             test_examples.append([example, category, 1])
+
+    train_examples_t += train_examples_s
 
     # Train and Val from source -> both domain encoder + domain clf and category encoder + category clf
     train_examples_source = train_examples_s[0:round(0.8*len(train_examples_s))]
