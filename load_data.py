@@ -171,7 +171,7 @@ def build_splits_domain_disentangle(opt):
                 val_examples_source.append([example, category, 0])
     
     for category, examples_list in target_examples.items():
-        domain_dict[1] = [(category, _) for _ in examples_list]
+        domain_dict[1] += [(category, _) for _ in examples_list]
 
     for domain, examples_list in domain_dict.items():
         split_idx = round(domain_ratios[domain] * domain_val_split_length)
