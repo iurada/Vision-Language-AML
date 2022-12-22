@@ -168,13 +168,12 @@ def build_splits_domain_disentangle(opt):
 
     target_val_split_length = target_total_examples * 0.2 # 20% of the training split used for validation
 
-    for category, example_list, domain in train_examples_temp:
+    for i, category, example_list, domain in enumerate(train_examples_temp):
         split_idx = round(target_category_ratios[domain] * target_val_split_length)
-        for i, example in enumerate(example_list):
-            if i > split_idx:
-                train_examples_st.append([example, category, domain])
-            else:
-                val_examples_target.append([example, category, domain])
+        if i > split_idx:
+            train_examples_st.append([example, category, domain])
+        else:
+            val_examples_target.append([example, category, domain])
 
 
     # Transforms
