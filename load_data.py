@@ -126,9 +126,6 @@ def build_splits_domain_disentangle(opt):
     source_examples = read_lines(opt['data_path'], source_domain)
     target_examples = read_lines(opt['data_path'], target_domain)
 
-    print(f'Source cat len {[(k, len(v)) for k,v in source_examples.items()]}')
-    print(f'Target cat len {[(k, len(v)) for k,v in target_examples.items()]}')
-
     # Compute ratios of examples for each category
     source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
     source_total_examples = sum(source_category_ratios.values())
@@ -145,9 +142,6 @@ def build_splits_domain_disentangle(opt):
         1: tot_target/(tot_source+tot_target),
     } 
 
-    print(f'Dictionary {source_category_ratios}')
-    print(f'Dictionary {domain_ratios}')
-    
     domain_val_split_length = (tot_source+tot_target)*0.2
 
     train_examples_source = []
@@ -181,20 +175,6 @@ def build_splits_domain_disentangle(opt):
             else:
                 val_examples_target.append([example[1], example[0], domain])
 
-    print(f'Train_example source {train_examples_source[0]} {len(train_examples_source)}')
-    print(f'Train_example target {train_examples_target[0]} {len(train_examples_target)}')
-    print(f'Val_example source {val_examples_source[0]} {len(val_examples_source)}')
-    print(f'Val_example target {val_examples_target[0]} {len(val_examples_target)}')
-
-    print(sum(1 for _ in train_examples_source if _[1] == 0))
-    print(sum(1 for _ in train_examples_source if _[1] == 1))
-    print(sum(1 for _ in train_examples_source if _[1] == 2))
-    print(sum(1 for _ in train_examples_source if _[1] == 3))
-    print(sum(1 for _ in train_examples_source if _[1] == 4))
-    print(sum(1 for _ in train_examples_source if _[1] == 5))
-    print(sum(1 for _ in train_examples_source if _[1] == 6))
-    print(sum(1 for _ in train_examples_target if _[2] == 0))
-    print(sum(1 for _ in train_examples_target if _[2] == 1))
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
 
