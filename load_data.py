@@ -158,8 +158,8 @@ def build_splits_domain_disentangle(opt):
 
     # Compute ratios of examples for each domain
     target_category_ratios = {
-        '0': 0,
-        '1': 1,
+        0: 0,
+        1: 1,
     }
     for _, _, domain in train_examples_temp:
         target_category_ratios[domain] += 1
