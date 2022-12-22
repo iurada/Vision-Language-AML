@@ -115,7 +115,7 @@ class DomainDisentangleModel(nn.Module):
             # Training with target
             domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
             domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
-            reconstructor = self.feature_reconstructor(domain_specific) # Minimize loss
+            reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific)) # Minimize loss
         else:
             # Testing
             category_class = self.category_classifier(category_specific)
