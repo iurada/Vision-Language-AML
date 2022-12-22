@@ -153,38 +153,33 @@ def build_splits_domain_disentangle(opt):
     train_examples_source = []
     val_examples_source = []
     train_examples_target = []
-    train_examples_s = []
-    train_examples_t = []
     val_examples_target = []
     test_examples = []
-
-    # To change from dictionary (key: category, value: paths) to a list of paths
-    for category, example_list in source_examples.items():
-        for example in example_list:
-            train_examples_s.append([example, category, 0])
     
-    # To change from dictionary (key: category, value: paths) to a list of paths
-    for category, example_list in target_examples.items():
-        for example in example_list:
-            train_examples_t.append([example, category, 1])
-            test_examples.append([example, category, 1])
+    domain_dict = {
+        0: [],
+        1: [],
+    }
 
-    # Union of the two domains
-    train_examples_t += train_examples_s
-
-    for i, parameters in enumerate(train_examples_s):
-        split_idx = round(source_category_ratios[parameters[1]] * source_val_split_length)
-        if i > split_idx:
-            train_examples_source.append([parameters[0], parameters[1], parameters[2]])
-        else:
-            val_examples_source.append([parameters[0], parameters[1], parameters[2]])
+    for category, examples_list in source_examples.items():
+        split_idx = round(source_category_ratios[category] * source_val_split_length)
+        domain_dict[0] += [(category, _) for _ in examples_list]
+        for i, example in enumerate(examples_list):
+            if i > split_idx:
+                train_examples_source.append([example, category, 0])
+            else:
+                val_examples_source.append([example, category, 0])
     
-    for i, parameters in enumerate(train_examples_t):
-        split_idx = round(domain_ratios[parameters[2]] * domain_val_split_length)
-        if i > split_idx:
-            train_examples_target.append([parameters[0], parameters[1], parameters[2]])
-        else:
-            val_examples_target.append([parameters[0], parameters[1], parameters[2]])
+    for category, examples_list in target_examples.items():
+        domain_dict[1] = [(category, _) for _ in examples_list]
+
+    for domain, examples_list in domain_dict.items():
+        split_idx = round(domain_ratios[domain] * domain_val_split_length)
+        for i, example in enumerate(examples_list):
+            if i > split_idx:
+                train_examples_source.append([example[1], example[0], 1])
+            else:
+                val_examples_target.append([example[1], example[0], 1])
 
     print(f'Train_example source {train_examples_source[0]} {len(train_examples_source)}')
     print(f'Train_example target {train_examples_target[0]} {len(train_examples_target)}')
