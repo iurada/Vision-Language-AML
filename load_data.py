@@ -2,6 +2,7 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as T
 import random
+import json
 
 CATEGORIES = {
     'dog': 0,
@@ -202,5 +203,158 @@ def build_splits_domain_disentangle(opt):
 
     return train_loader_1, train_loader_2, val_loader_1, val_loader_2, test_loader
 
-def build_splits_clip_disentangle(opt):
-    raise NotImplementedError('[TODO] Implement build_splits_clip_disentangle') #TODO
+class PACSDatasetClipDisentangle(Dataset):
+    def __init__(self, examples, transform):
+        self.examples = examples
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.examples)
+    
+    def __getitem__(self, index):
+        img_path, y, domain = self.examples[index]
+        x = self.transform(Image.open(img_path).convert('RGB'))
+        return x, y, domain
+
+def getDomain(path):
+    return path.split('/')[0]
+
+def getCategory(path):
+    return path.split('/')[1]   
+
+def readJSON(domains):
+    '''
+    return a dictionary with image paths as keys and image descriptions as values
+    '''
+
+    with open("./data/LabeledPACS/Labeled PACS/descriptions.json") as file:
+        #print(file.read())
+        data = json.loads(file.read())
+
+        return {i['image_name']: i['descriptions'] for i in data if getDomain(i['image_name']) in domains}      
+
+
+def build_splits_clip_disentangle(opt, mode=None):
+
+    if mode == None:
+        source_domain = 'art_painting'
+        target_domain = opt['target_domain']
+
+        
+    source_examples_dict = readJSON([source_domain])
+    target_examples_dict = readJSON([target_domain])
+
+    '''
+    create dict with category as key and list of (path, description) as value
+    '''
+    source_examples = dict()
+    for k,v in source_examples_dict.items():
+        if source_examples[getCategory(k)]:
+            source_examples[getCategory(k)].append((k, v))
+        else:
+            source_examples[getCategory(k)] = list()
+            source_examples[getCategory(k)].append((k,v))
+
+    target_examples = dict()
+    for k,v in target_examples_dict.items():
+        if target_examples[getCategory(k)]:
+            target_examples[getCategory(k)].append((k, v))
+        else:
+            target_examples[getCategory(k)] = list()
+            target_examples[getCategory(k)].append((k,v))
+                    
+    
+
+    # Compute ratios of examples for each category
+    source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
+    source_total_examples = sum(source_category_ratios.values())
+    source_category_ratios = {category_idx: c / source_total_examples for category_idx, c in source_category_ratios.items()}
+
+    # Build splits - we train only on the source domain (Art Painting)
+    source_val_split_length = source_total_examples * 0.2 # 20% of the training split used for validation
+
+    tot_source = sum([len(v) for k,v in source_examples.items()])
+    tot_target = sum([len(v) for k,v in target_examples.items()])
+
+    domain_ratios = {
+        0: tot_source/(tot_source+tot_target),
+        1: tot_target/(tot_source+tot_target),
+    } 
+
+    domain_val_split_length = (tot_source+tot_target)*0.2
+
+    train_examples_source = []
+    val_examples_source = []
+    train_examples_target = []
+    val_examples_target = []
+    test_examples = []
+    
+    domain_dict = {
+        0: [],
+        1: [],
+    }
+
+    for category, examples_list in source_examples.items():
+        split_idx = round(source_category_ratios[category] * source_val_split_length)
+        domain_dict[0] += [(category, _) for _ in examples_list]
+        for i, example in enumerate(examples_list):
+            if i > split_idx:
+                train_examples_source.append([example, category, 0])
+            else:
+                val_examples_source.append([example, category, 0])
+    
+    for category, examples_list in target_examples.items():
+        domain_dict[1] += [(category, _) for _ in examples_list]
+
+    for domain, examples_list in domain_dict.items():
+        split_idx = round(domain_ratios[domain] * domain_val_split_length)
+        for i, example in enumerate(examples_list):
+            if i > split_idx:
+                train_examples_target.append([example[1], example[0], domain])
+            else:
+                val_examples_target.append([example[1], example[0], domain])
+
+    print(f'Train_example source {train_examples_source[0]} {len(train_examples_source)}')
+    print(f'Train_example target {train_examples_target[0]} {len(train_examples_target)}')
+    print(f'Val_example source {val_examples_source[0]} {len(val_examples_source)}')
+    print(f'Val_example target {val_examples_target[0]} {len(val_examples_target)}')
+
+    print(sum(1 for _ in train_examples_source if _[1] == 0))
+    print(sum(1 for _ in train_examples_source if _[1] == 1))
+    print(sum(1 for _ in train_examples_source if _[1] == 2))
+    print(sum(1 for _ in train_examples_source if _[1] == 3))
+    print(sum(1 for _ in train_examples_source if _[1] == 4))
+    print(sum(1 for _ in train_examples_source if _[1] == 5))
+    print(sum(1 for _ in train_examples_source if _[1] == 6))
+    print(sum(1 for _ in train_examples_target if _[2] == 0))
+    print(sum(1 for _ in train_examples_target if _[2] == 1))            
+
+
+    # Transforms
+    normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
+
+    train_transform = T.Compose([
+        T.Resize(256),
+        T.RandAugment(3, 15),
+        T.CenterCrop(224),
+        T.ToTensor(),
+        normalize
+    ])
+
+    eval_transform = T.Compose([
+        T.Resize(256),
+        T.CenterCrop(224),
+        T.ToTensor(),
+        normalize
+    ])
+
+    # Dataloaders
+    train_loader_1 = DataLoader(PACSDatasetDomainDisentangle(train_examples_source, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True) 
+    train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples_for_dclf, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+    val_loader_1 = DataLoader(PACSDatasetDomainDisentangle(val_examples_both, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples_dclf, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    test_loader = DataLoader(PACSDatasetDomainDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+
+    return train_loader_1, train_loader_2, val_loader_1, val_loader_2, test_loader
+
+
