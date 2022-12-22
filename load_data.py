@@ -126,8 +126,8 @@ def build_splits_domain_disentangle(opt):
     source_examples = read_lines(opt['data_path'], source_domain)
     target_examples = read_lines(opt['data_path'], target_domain)
 
-    print(f'Source cat len {[(k, len(v)) for k,v in source_examples]}')
-    print(f'Target cat len {[(k, len(v)) for k,v in target_examples]}')
+    print(f'Source cat len {[(k, len(v)) for k,v in source_examples.items()]}')
+    print(f'Target cat len {[(k, len(v)) for k,v in target_examples.items()]}')
     # Compute ratios of examples for each category
     source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
     source_total_examples = sum(source_category_ratios.values())
