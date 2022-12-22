@@ -177,7 +177,7 @@ def build_splits_domain_disentangle(opt):
         split_idx = round(domain_ratios[domain] * domain_val_split_length)
         for i, example in enumerate(examples_list):
             if i > split_idx:
-                train_examples_source.append([example[1], example[0], 1])
+                train_examples_target.append([example[1], example[0], 1])
             else:
                 val_examples_target.append([example[1], example[0], 1])
 
