@@ -352,9 +352,9 @@ def build_splits_clip_disentangle(opt, mode=None):
 
     # Dataloaders
     train_loader_1 = DataLoader(PACSDatasetDomainDisentangle(train_examples_source, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True) 
-    train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples_for_dclf, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    val_loader_1 = DataLoader(PACSDatasetDomainDisentangle(val_examples_both, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
-    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples_dclf, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples_target, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+    val_loader_1 = DataLoader(PACSDatasetDomainDisentangle(val_examples_source, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples_target, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
     test_loader = DataLoader(PACSDatasetDomainDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
 
     return train_loader_1, train_loader_2, val_loader_1, val_loader_2, test_loader
