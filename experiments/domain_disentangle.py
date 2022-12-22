@@ -87,7 +87,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
                 if label == 0:
                     # Validation with source                
-                    _, _, category_class, _, _, _ = self.model(x, label)
+                    _, _, category_class, _ = self.model(x, label)
                     loss += self.criterion_1(category_class, y)
                     pred = torch.argmax(category_class, dim=-1)
                     accuracy += (pred == y).sum().item()
