@@ -126,7 +126,8 @@ def build_splits_domain_disentangle(opt):
     source_examples = read_lines(opt['data_path'], source_domain)
     target_examples = read_lines(opt['data_path'], target_domain)
 
-    '''
+    print(f'Source cat len {[(k, len(v)) for k,v in source_examples]}')
+    print(f'Target cat len {[(k, len(v)) for k,v in target_examples]}')
     # Compute ratios of examples for each category
     source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
     source_total_examples = sum(source_category_ratios.values())
@@ -134,7 +135,16 @@ def build_splits_domain_disentangle(opt):
 
     # Build splits - we train only on the source domain (Art Painting)
     source_val_split_length = source_total_examples * 0.2 # 20% of the training split used for validation
-    '''
+
+    tot_source = sum([len(v) for k,v in source_examples.items()])
+    tot_target = sum([len(v) for k,v in target_examples.items()])
+
+    domain_ratios = {
+        0: tot_source/(tot_source+tot_target),
+        1: tot_target/(tot_source+tot_target),
+    } 
+    
+    domain_val_split_length = (tot_source+tot_target)*0.2
 
     train_examples_source = []
     val_examples_source = []
@@ -144,61 +154,33 @@ def build_splits_domain_disentangle(opt):
     val_examples_target = []
     test_examples = []
 
+    # To change from dictionary (key: category, value: paths) to a list of paths
     for category, example_list in source_examples.items():
         for example in example_list:
             train_examples_s.append([example, category, 0])
     
+    # To change from dictionary (key: category, value: paths) to a list of paths
     for category, example_list in target_examples.items():
         for example in example_list:
             train_examples_t.append([example, category, 1])
             test_examples.append([example, category, 1])
 
+    # Union of the two domains
     train_examples_t += train_examples_s
 
-    # Train and Val from source -> both domain encoder + domain clf and category encoder + category clf
-    train_examples_source = train_examples_s[0:round(0.8*len(train_examples_s))]
-    val_examples_source = train_examples_s[round(0.8*len(train_examples_s)):]
-
-    # Train and Val from domain -> only domain encoder + domain clf
-    train_examples_target = train_examples_t[0:round(0.8*len(train_examples_t))]
-    val_examples_target = train_examples_t[round(0.8*len(train_examples_t)):]
-
-    '''
-    for category, example_list in source_examples.items():
-        split_idx = round(source_category_ratios[category] * source_val_split_length)
-        for i, example in enumerate(example_list):
-            if i > split_idx:
-                train_examples_source.append([example, category, 0])
-            else:
-                val_examples_source.append([example, category, 0])
-    
-    for category, example_list in target_examples.items():
-        for example in example_list:
-            train_examples_target.append([example, category, 1])
-            test_examples.append([example, category, 1])
-
-    train_examples_temp = train_examples_source + train_examples_target
-
-    # Compute ratios of examples for each domain
-    target_category_ratios = {
-        0: 0,
-        1: 1,
-    }
-    for _, _, domain in train_examples_temp:
-        target_category_ratios[domain] += 1
-    target_total_examples = sum(target_category_ratios.values())
-    target_category_ratios = {domain: c / target_total_examples for domain, c in target_category_ratios.items()}
-
-    target_val_split_length = target_total_examples * 0.2 # 20% of the training split used for validation
-
-    for i, parameters in enumerate(train_examples_temp):
-        split_idx = round(target_category_ratios[parameters[2]] * target_val_split_length)
+    for i, parameters in enumerate(train_examples_s):
+        split_idx = round(source_category_ratios[parameters[1]] * source_val_split_length)
         if i > split_idx:
-            train_examples_st.append([parameters[0], parameters[1], parameters[2]])
+            train_examples_source.append([parameters[0], parameters[1], parameters[2]])
+        else:
+            val_examples_source.append([parameters[0], parameters[1], parameters[2]])
+    
+    for i, parameters in enumerate(train_examples_t):
+        split_idx = round(domain_ratios[parameters[2]] * domain_val_split_length)
+        if i > split_idx:
+            train_examples_target.append([parameters[0], parameters[1], parameters[2]])
         else:
             val_examples_target.append([parameters[0], parameters[1], parameters[2]])
-    '''
-
 
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
