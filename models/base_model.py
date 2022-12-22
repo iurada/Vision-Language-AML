@@ -98,12 +98,7 @@ class DomainDisentangleModel(nn.Module):
         # Feature extraction
         features = self.feature_extractor(x)
         # Disentanglement process
-        if label == 0:
-            # Training with source
-            domain_specific = self.domain_encoder(features)
-            category_specific = self.category_encoder(features)
-        elif label == 1:
-            # Training with target
+        if label != 2:
             domain_specific = self.domain_encoder(features)
             category_specific = self.category_encoder(features)
         else:
@@ -114,9 +109,7 @@ class DomainDisentangleModel(nn.Module):
         if label == 0:
             # Training with source
             category_class_ce = self.category_classifier(category_specific) # Minimize loss
-            domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
             category_class_de = self.category_classifier(domain_specific) # Maximize loss
-            domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
             reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific)) # Minimize loss
         elif label == 1:
             # Training with target
@@ -130,7 +123,7 @@ class DomainDisentangleModel(nn.Module):
         # Return objects
         if label == 0:
             # Training with source
-            return reconstructor, features, category_class_ce, domain_class_de, category_class_de, domain_class_ce
+            return reconstructor, features, category_class_ce, category_class_de
         elif label == 1:
             # Training with target
             return reconstructor, features, domain_class_de, domain_class_ce
