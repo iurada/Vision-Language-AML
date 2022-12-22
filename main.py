@@ -77,7 +77,7 @@ def main(opt):
         elif opt['experiment'] == 'domain_disentangle':
             print('Train loop with source')
             # Train loop with source
-            while iteration < 500:
+            while iteration < 1000:
                 for data in train_loader_source:
 
                     total_train_loss += experiment.train_iteration(data, label=0)
@@ -101,7 +101,7 @@ def main(opt):
             total_train_loss = 0
             print('Train loop with target')
             # Train loop with target
-            while iteration < 500:
+            while iteration < 1000:
                 for data in train_loader_target:
 
                     total_train_loss += experiment.train_iteration(data, label=1)

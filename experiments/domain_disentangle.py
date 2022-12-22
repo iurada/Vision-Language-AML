@@ -54,13 +54,17 @@ class DomainDisentangleExperiment: # See point 2. of the project
             # Training with source
             loss_1 = self.criterion_1(results[2], y)
             loss_2 = -self.criterion_1(results[3], y)
-            loss_3 = self.criterion_2(results[0], results[1])
+            loss_3 = self.criterion_1(results[4], domain)
+            loss_4 = -self.criterion_1(results[5], domain)
+            loss_5 = self.criterion_2(results[0], results[1])
             self.optimizer.zero_grad()
             loss_1.backward(retain_graph=True)
             loss_2.backward(retain_graph=True)
             loss_3.backward(retain_graph=True)
+            loss_4.backward(retain_graph=True)
+            loss_5.backward(retain_graph=True)
             self.optimizer.step()
-            loss = loss_1 + loss_2 + loss_3
+            loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_5
             return loss.item()
         else:
             # Training with target

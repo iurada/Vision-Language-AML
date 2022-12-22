@@ -135,6 +135,15 @@ def build_splits_domain_disentangle(opt):
     # Build splits - we train only on the source domain (Art Painting)
     source_val_split_length = source_total_examples * 0.2 # 20% of the training split used for validation
 
+    # Compute ratios of examples for each category
+    target_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in target_examples.items()}
+    target_total_examples = sum(target_category_ratios.values())
+    target_category_ratios = {category_idx: c / target_total_examples for category_idx, c in target_category_ratios.items()}
+
+    # Build splits - we train only on the source domain (Art Painting)
+    target_val_split_length = target_total_examples * 0.2 # 20% of the training split used for validation
+
+    '''
     tot_source = sum([len(v) for k,v in source_examples.items()])
     tot_target = sum([len(v) for k,v in target_examples.items()])
 
@@ -144,21 +153,16 @@ def build_splits_domain_disentangle(opt):
     } 
 
     domain_val_split_length = (tot_source+tot_target)*0.2
+    '''
 
     train_examples_source = []
     val_examples_source = []
     train_examples_target = []
     val_examples_target = []
     test_examples = []
-    
-    domain_dict = {
-        0: [],
-        1: [],
-    }
 
     for category, examples_list in source_examples.items():
         split_idx = round(source_category_ratios[category] * source_val_split_length)
-        domain_dict[0] += [(category, _) for _ in examples_list]
         for i, example in enumerate(examples_list):
             if i > split_idx:
                 train_examples_source.append([example, category, 0])
@@ -166,17 +170,13 @@ def build_splits_domain_disentangle(opt):
                 val_examples_source.append([example, category, 0])
     
     for category, examples_list in target_examples.items():
-        domain_dict[1] += [(category, _) for _ in examples_list]
-        for i in examples_list:
-          test_examples.append([i, category, 1])
-
-    for domain, examples_list in domain_dict.items():
-        split_idx = round(domain_ratios[domain] * domain_val_split_length)
+        split_idx = round(target_category_ratios[category] * target_val_split_length)
         for i, example in enumerate(examples_list):
+            test_examples.append([example, category, 1])
             if i > split_idx:
-                train_examples_target.append([example[1], example[0], domain])
+                train_examples_target.append([example, category, 1])
             else:
-                val_examples_target.append([example[1], example[0], domain])
+                val_examples_target.append([example, category, 1])
 
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
