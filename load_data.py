@@ -249,7 +249,7 @@ def build_splits_clip_disentangle(opt, mode=None):
     '''
     source_examples = dict()
     for k,v in source_examples_dict.items():
-        if source_examples[getCategory(k)]:
+        if getCategory(k) in source_examples:
             source_examples[getCategory(k)].append((k, v))
         else:
             source_examples[getCategory(k)] = list()
@@ -257,7 +257,7 @@ def build_splits_clip_disentangle(opt, mode=None):
 
     target_examples = dict()
     for k,v in target_examples_dict.items():
-        if target_examples[getCategory(k)]:
+        if getCategory(k) in target_examples:
             target_examples[getCategory(k)].append((k, v))
         else:
             target_examples[getCategory(k)] = list()
