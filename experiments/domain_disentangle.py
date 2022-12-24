@@ -11,8 +11,6 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.model = DomainDisentangleModel()
         self.model.train()
         self.model.to(self.device)
-        for param in self.model.parameters():
-            param.requires_grad = True
 
         # Setup optimization procedure
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
@@ -43,42 +41,44 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         return iteration, best_accuracy, total_train_loss
 
-    def train_iteration(self, data, label):
+    def train_iteration(self, data, state):
         x, y, domain = data
         x = x.to(self.device)
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        results = self.model(x, label)
-        if label == 0:
-            # Training with source
-            loss_1 = self.criterion_1(results[2], y)
-            loss_2 = -self.criterion_1(results[3], y)
-            loss_3 = self.criterion_1(results[4], domain)
-            loss_4 = -self.criterion_1(results[5], domain)
-            loss_5 = self.criterion_2(results[0], results[1])
-            self.optimizer.zero_grad()
-            loss_1.backward(retain_graph=True)
-            loss_2.backward(retain_graph=True)
-            loss_3.backward(retain_graph=True)
-            loss_4.backward(retain_graph=True)
-            loss_5.backward(retain_graph=True)
-            self.optimizer.step()
-            loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_5
-            return loss.item()
-        else:
-            # Training with target
-            loss_1 = self.criterion_1(results[2], domain) 
-            loss_2 = -self.criterion_1(results[3], domain)
-            loss_3 = self.criterion_2(results[0], results[1])
-            loss_1.backward(retain_graph=True)
-            loss_2.backward(retain_graph=True)
-            loss_3.backward(retain_graph=True)
-            self.optimizer.step()
-            loss = loss_1 + loss_2 + loss_3
-            return loss.item()
+        logits = self.model(x, state, train=True)
 
-    def validate(self, loader, label):
+        if state == 'category_disentanglement_phase_1':
+            loss = self.criterion_1(logits, y) # Minimize loss
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+        elif state == 'domain_disentanglement_phase_1':
+            loss = self.criterion_1(logits, domain) # Minimize loss
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+        elif state == 'category_disentanglement_phase_2':
+            loss = -self.criterion_1(logits, y) # Maximize loss
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+        elif state == 'domain_disentanglement_phase_2':
+            loss = -self.criterion_1(logits, domain) # Maximize loss
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+        elif state == "feature_reconstruction":
+            loss = self.criterion_1(logits[0], logits[1]) # Minimize loss
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+        
+        return loss.item()
+
+
+    def validate(self, loader, state):
         self.model.eval()
         accuracy = 0
         count = 0
@@ -89,26 +89,32 @@ class DomainDisentangleExperiment: # See point 2. of the project
                 y = y.to(self.device)
                 domain = domain.to(self.device)
 
-                if label == 0:
-                    # Validation with source                
-                    _, _, category_class, _, _, _ = self.model(x, label)
-                    loss += self.criterion_1(category_class, y)
-                    pred = torch.argmax(category_class, dim=-1)
+                logits = self.model(x, state, train=False)
+
+                if state == 'category_disentanglement_phase_1':
+                    loss += self.criterion(logits, y)
+                    pred = torch.argmax(logits, dim=-1)
                     accuracy += (pred == y).sum().item()
                     count += x.size(0)
-                elif label == 1:
-                    # Validation with target
-                    _, _, domain_class, _ = self.model(x, label)
-                    loss += self.criterion_1(domain_class, domain)
-                    pred = torch.argmax(domain_class, dim=-1)
+                elif state == 'domain_disentanglement_phase_1':
+                    loss += self.criterion(logits, domain)
+                    pred = torch.argmax(logits, dim=-1)
                     accuracy += (pred == domain).sum().item()
                     count += x.size(0)
-                else:
-                    # Testing
-                    result = self.model(x, label)
-                    loss += self.criterion_1(result, y)
-                    pred = torch.argmax(result, dim=-1)
-                    accuracy += (pred==y).sum().item()
+                elif state == 'category_disentanglement_phase_2':
+                    loss += self.criterion(logits, y)
+                    pred = torch.argmax(logits, dim=-1)
+                    accuracy += (pred == y).sum().item()
+                    count += x.size(0)
+                elif state == 'domain_disentanglement_phase_2':
+                    loss += self.criterion(logits, domain)
+                    pred = torch.argmax(logits, dim=-1)
+                    accuracy += (pred == domain).sum().item()
+                    count += x.size(0)
+                elif state == 'feature_reconstruction':
+                    loss += self.criterion(logits[0], logits[1])
+                    pred = torch.argmax(logits[1], dim=-1)
+                    accuracy += (pred == logits[0]).sum().item()
                     count += x.size(0)
 
         mean_accuracy = accuracy / count

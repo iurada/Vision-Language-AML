@@ -1,32 +1,12 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from torchvision.models import resnet18
-
-class FeatureExtractor(nn.Module):
-    def __init__(self):
-        super(FeatureExtractor, self).__init__()
-        self.resnet18 = resnet18(pretrained=True)
-    
-    def forward(self, x):
-        x = self.resnet18.conv1(x)
-        x = self.resnet18.bn1(x)
-        x = self.resnet18.relu(x)
-        x = self.resnet18.maxpool(x)
-        x = self.resnet18.layer1(x)
-        x = self.resnet18.layer2(x)
-        x = self.resnet18.layer3(x)
-        x = self.resnet18.layer4(x)
-        x = self.resnet18.avgpool(x)
-        x = x.squeeze()
-        if len(x.size()) < 2:
-            x = x.unsqueeze(0)
-        return x
+import components as cmp
 
 class BaselineModel(nn.Module):
     def __init__(self):
         super(BaselineModel, self).__init__()
-        self.feature_extractor = FeatureExtractor()
+        self.feature_extractor = cmp.FeatureExtractor()
         self.category_encoder = nn.Sequential(
             nn.Linear(512, 512),
             nn.BatchNorm1d(512),
@@ -51,85 +31,111 @@ class BaselineModel(nn.Module):
 class DomainDisentangleModel(nn.Module):
     def __init__(self):
         super(DomainDisentangleModel, self).__init__()
-        self.feature_extractor = FeatureExtractor()
-        self.domain_encoder = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.BatchNorm1d(256),
-            nn.ReLU(),
+        self.feature_extractor = cmp.FeatureExtractor()
+        self.disentangler = cmp.Disentangler()
+        self.category_classifier = cmp.CategoryClassifier()
+        self.domain_classifier = cmp.DomainClassifier()
+        self.reconstructor = cmp.Reconstructor()
 
-            nn.Linear(256, 128),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
-            nn.ReLU()
-        )
-        self.category_encoder = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.BatchNorm1d(256),
-            nn.ReLU(),
-
-            nn.Linear(256, 128),
-            nn.BatchNorm1d(128),
-            nn.ReLU(),
-
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
-            nn.ReLU()
-        )
-        self.domain_classifier = nn.Linear(64, 2)
-        self.category_classifier = nn.Linear(64, 7)
-        self.feature_reconstructor = nn.Sequential(
-            nn.ReLU(),
-            nn.BatchNorm1d(64),
-            nn.Linear(64, 128),
-
-            nn.ReLU(),
-            nn.BatchNorm1d(128),
-            nn.Linear(128, 256),
-
-            nn.ReLU(),
-            nn.BatchNorm1d(256),
-            nn.Linear(256, 512)
-        )
-
-    def forward(self, x, label):
-        # Feature extraction
-        features = self.feature_extractor(x)
-        # Disentanglement process
-        if label != 2:
-            domain_specific = self.domain_encoder(features)
-            category_specific = self.category_encoder(features)
-        else:
-            # Testing
-            category_specific = self.category_encoder(features)
-
-        # Classification process
-        if label == 0:
-            # Training with source
-            category_class_ce = self.category_classifier(category_specific) # Minimize loss
-            category_class_de = self.category_classifier(domain_specific) # Maximize loss
-            domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
-            domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
-            reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific)) # Minimize loss
-        elif label == 1:
-            # Training with target
-            domain_class_ce = self.domain_classifier(category_specific) # Maximize loss
-            domain_class_de = self.domain_classifier(domain_specific) # Minimize loss
-            reconstructor = self.feature_reconstructor(torch.add(category_specific, domain_specific)) # Minimize loss
-        else:
-            # Testing
-            category_class = self.category_classifier(category_specific)
-
-        # Return objects
-        if label == 0:
-            # Training with source
-            return reconstructor, features, category_class_ce, category_class_de, domain_class_de, domain_class_ce
-        elif label == 1:
-            # Training with target
-            return reconstructor, features, domain_class_de, domain_class_ce
-        else:
-            # Testing
-            return category_class
-
+    def forward(self, x, state=None, train=True):
+        if state == 'category_disentanglement_phase_1' and train == True:
+            # Loss for category classifier to minimize
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
+            cmp.set_requires_grad(self.disentangler, requires_grad=True)
+            cmp.set_requires_grad(self.category_classifier, requires_grad=True)
+            x = self.feature_extractor(x)
+            x = self.disentangler(x, domain=False) # Category encoder
+            x = self.category_classifier(x)
+            return x
+        elif state == 'category_disentanglement_phase_1' and train == False:
+            # Validation
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
+            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.category_classifier, requires_grad=False)
+            x = self.feature_extractor(x)
+            x = self.disentangler(x, domain=False) # Category encoder
+            x = self.category_classifier(x)
+            return x
+        elif state == 'domain_disentanglement_phase_1' and train == True:
+            # Loss for domain classifier to minimize
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
+            cmp.set_requires_grad(self.disentangler, requires_grad=True)
+            cmp.set_requires_grad(self.domain_classifier, requires_grad=True)
+            x = self.feature_extractor(x)
+            x = self.disentangler(x, domain=True) # Domain encoder
+            x = self.domain_classifier(x)
+            return x
+        elif state == 'domain_disentanglement_phase_1' and train == False:
+            # Validation
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
+            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.domain_classifier, requires_grad=False)
+            x = self.feature_extractor(x)
+            x = self.disentangler(x, domain=True) # Domain encoder
+            x = self.domain_classifier(x)
+            return x
+        elif state == 'category_disentanglement_phase_2' and train == True:
+            # Loss for domain classifier to maximise
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
+            cmp.set_requires_grad(self.disentangler, requires_grad=True)
+            cmp.set_requires_grad(self.domain_classifier, requires_grad=False)
+            x = self.feature_extractor(x)
+            x = self.disentangler(x, domain=False) # Category encoder
+            x = self.domain_classifier(x)
+            return x
+        elif state == 'category_disentanglement_phase_2' and train == False:
+            # Validation
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
+            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.domain_classifier, requires_grad=False)
+            x = self.feature_extractor(x)
+            x = self.disentangler(x, domain=False) # Category encoder
+            x = self.domain_classifier(x)
+            return x
+        elif state == 'domain_disentanglement_phase_2' and train == True:
+            # Loss for category classifier to maximise
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
+            cmp.set_requires_grad(self.disentangler, requires_grad=True)
+            cmp.set_requires_grad(self.category_classifier, requires_grad=False)
+            x = self.feature_extractor(x)
+            x = self.disentangler(x, domain=True) # Domain encoder
+            x = self.category_classifier(x)
+            return x
+        elif state == 'domain_disentanglement_phase_2' and train == False:
+            # Validation
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
+            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.category_classifier, requires_grad=False)
+            x = self.feature_extractor(x)
+            x = self.disentangler(x, domain=True) # Domain encoder
+            x = self.category_classifier(x)
+            return x
+        elif state == "feature_reconstruction" and train == True:
+            # Loss for reconstructor to minimize
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
+            cmp.set_requires_grad(self.disentangler, requires_grad=True)
+            cmp.set_requires_grad(self.reconstructor, requires_grad=True)
+            x = self.feature_extractor(x)
+            fcs = self.disentangler(x, domain=False)
+            fds = self.disentangler(x, domain=True)
+            rec = self.reconstructor(torch.cat(fcs, fds))
+            return x, rec
+        elif state == "feature_reconstruction" and train == False:
+            # Validation
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
+            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.reconstructor, requires_grad=False)
+            x = self.feature_extractor(x)
+            fcs = self.disentangler(x, domain=False)
+            fds = self.disentangler(x, domain=True)
+            rec = self.reconstructor(torch.cat(fcs, fds))
+            return x, rec
+        elif state == None:
+            # Testing part
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
+            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.category_classifier, requires_grad=False)
+            x = self.feature_extractor(x)
+            x = self.disentangler(x, domain=False)
+            x = self.category_classifier(x)
+            return x
