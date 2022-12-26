@@ -77,7 +77,7 @@ def main(opt):
         elif opt['experiment'] == 'domain_disentangle':
             print('Pre-training')
             # Train loops 
-            while iteration < 500:
+            while iteration < 50:
                 for data in zip(train_loader_1, train_loader_2):
                     # Only source data
                     total_train_loss += experiment.train_iteration(data[1], state='phase_1_category_disentanglement')
@@ -100,7 +100,7 @@ def main(opt):
             total_train_loss = 0
             iteration = 0
             print('Training')
-            while iteration < 500:
+            while iteration < 50:
                 for data in train_loader_2:
                     # Source + target data
                     total_train_loss += experiment.train_iteration(data, state='phase_2')
