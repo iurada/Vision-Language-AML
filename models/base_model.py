@@ -80,7 +80,7 @@ class DomainDisentangleModel(nn.Module):
             return x
 
         '''Train and validation parts for second steps'''
-        if state == 'phase2' and train == True:
+        if state == 'phase_2' and train == True:
             # Training
             set_requires_grad(self.feature_extractor, requires_grad=True)
             set_requires_grad(self.encoder, requires_grad=True)
