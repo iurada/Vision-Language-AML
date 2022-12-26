@@ -32,110 +32,122 @@ class DomainDisentangleModel(nn.Module):
     def __init__(self):
         super(DomainDisentangleModel, self).__init__()
         self.feature_extractor = cmp.FeatureExtractor()
-        self.disentangler = cmp.Disentangler()
+        self.encoder = cmp.Encoder()
         self.category_classifier = cmp.CategoryClassifier()
         self.domain_classifier = cmp.DomainClassifier()
         self.reconstructor = cmp.Reconstructor()
 
     def forward(self, x, state=None, train=True):
+
+        '''Train and validation parts for category encoder's first step'''
         if state == 'category_disentanglement_phase_1' and train == True:
             # Loss for category classifier to minimize
             cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
-            cmp.set_requires_grad(self.disentangler, requires_grad=True)
+            cmp.set_requires_grad(self.encoder, requires_grad=True)
             cmp.set_requires_grad(self.category_classifier, requires_grad=True)
             x = self.feature_extractor(x)
-            x = self.disentangler(x, domain=False) # Category encoder
+            x = self.encoder(x, domain=False) # Category encoder
             x = self.category_classifier(x)
             return x
-        elif state == 'category_disentanglement_phase_1' and train == False:
+        if state == 'category_disentanglement_phase_1' and train == False:
             # Validation
             cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
-            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.encoder, requires_grad=False)
             cmp.set_requires_grad(self.category_classifier, requires_grad=False)
             x = self.feature_extractor(x)
-            x = self.disentangler(x, domain=False) # Category encoder
+            x = self.encoder(x, domain=False) # Category encoder
             x = self.category_classifier(x)
             return x
-        elif state == 'domain_disentanglement_phase_1' and train == True:
+
+        '''Train and validation parts for domain encoder's first step'''
+        if state == 'domain_disentanglement_phase_1' and train == True:
             # Loss for domain classifier to minimize
             cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
-            cmp.set_requires_grad(self.disentangler, requires_grad=True)
+            cmp.set_requires_grad(self.encoder, requires_grad=True)
             cmp.set_requires_grad(self.domain_classifier, requires_grad=True)
             x = self.feature_extractor(x)
-            x = self.disentangler(x, domain=True) # Domain encoder
+            x = self.encoder(x, domain=True) # Domain encoder
             x = self.domain_classifier(x)
             return x
-        elif state == 'domain_disentanglement_phase_1' and train == False:
+        if state == 'domain_disentanglement_phase_1' and train == False:
+            # Validation
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
+            cmp.set_requires_grad(self.encoder, requires_grad=False)
+            cmp.set_requires_grad(self.domain_classifier, requires_grad=False)
+            x = self.feature_extractor(x)
+            x = self.encoder(x, domain=True) # Domain encoder
+            x = self.domain_classifier(x)
+            return x
+
+        '''Train and validation parts for category encoder's second step'''
+        if state == 'category_disentanglement_phase_2' and train == True:
+            # Loss for domain classifier to maximize
+            cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
+            cmp.set_requires_grad(self.encoder, requires_grad=True)
+            cmp.set_requires_grad(self.domain_classifier, requires_grad=False)
+            x = self.feature_extractor(x)
+            x = self.encoder(x, domain=False) # Category encoder
+            x = self.domain_classifier(x)
+            return x
+        if state == 'category_disentanglement_phase_2' and train == False:
             # Validation
             cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
             cmp.set_requires_grad(self.disentangler, requires_grad=False)
-            cmp.set_requires_grad(self.domain_classifier, requires_grad=False)
-            x = self.feature_extractor(x)
-            x = self.disentangler(x, domain=True) # Domain encoder
-            x = self.domain_classifier(x)
-            return x
-        elif state == 'category_disentanglement_phase_2' and train == True:
-            # Loss for domain classifier to maximise
-            cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
-            cmp.set_requires_grad(self.disentangler, requires_grad=True)
             cmp.set_requires_grad(self.domain_classifier, requires_grad=False)
             x = self.feature_extractor(x)
             x = self.disentangler(x, domain=False) # Category encoder
             x = self.domain_classifier(x)
             return x
-        elif state == 'category_disentanglement_phase_2' and train == False:
-            # Validation
-            cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
-            cmp.set_requires_grad(self.disentangler, requires_grad=False)
-            cmp.set_requires_grad(self.domain_classifier, requires_grad=False)
-            x = self.feature_extractor(x)
-            x = self.disentangler(x, domain=False) # Category encoder
-            x = self.domain_classifier(x)
-            return x
-        elif state == 'domain_disentanglement_phase_2' and train == True:
-            # Loss for category classifier to maximise
+        
+        '''Train and validation parts for domain encoder's second step'''
+        if state == 'domain_disentanglement_phase_2' and train == True:
+            # Loss for category classifier to maximize
             cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
-            cmp.set_requires_grad(self.disentangler, requires_grad=True)
+            cmp.set_requires_grad(self.encoder, requires_grad=True)
             cmp.set_requires_grad(self.category_classifier, requires_grad=False)
             x = self.feature_extractor(x)
-            x = self.disentangler(x, domain=True) # Domain encoder
+            x = self.encoder(x, domain=True) # Domain encoder
             x = self.category_classifier(x)
             return x
-        elif state == 'domain_disentanglement_phase_2' and train == False:
+        if state == 'domain_disentanglement_phase_2' and train == False:
             # Validation
             cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
-            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.encoder, requires_grad=False)
             cmp.set_requires_grad(self.category_classifier, requires_grad=False)
             x = self.feature_extractor(x)
-            x = self.disentangler(x, domain=True) # Domain encoder
+            x = self.encoder(x, domain=True) # Domain encoder
             x = self.category_classifier(x)
             return x
-        elif state == "feature_reconstruction" and train == True:
+
+        '''Train and validation parts for reconstructor'''
+        if state == "feature_reconstruction" and train == True:
             # Loss for reconstructor to minimize
             cmp.set_requires_grad(self.feature_extractor, requires_grad=True)
-            cmp.set_requires_grad(self.disentangler, requires_grad=True)
+            cmp.set_requires_grad(self.encoder, requires_grad=True)
             cmp.set_requires_grad(self.reconstructor, requires_grad=True)
             x = self.feature_extractor(x)
-            fcs = self.disentangler(x, domain=False)
-            fds = self.disentangler(x, domain=True)
+            fcs = self.encoder(x, domain=False)
+            fds = self.encoder(x, domain=True)
             rec = self.reconstructor(torch.cat(fcs, fds))
             return x, rec
-        elif state == "feature_reconstruction" and train == False:
+        if state == "feature_reconstruction" and train == False:
             # Validation
             cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
-            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.encoder, requires_grad=False)
             cmp.set_requires_grad(self.reconstructor, requires_grad=False)
             x = self.feature_extractor(x)
-            fcs = self.disentangler(x, domain=False)
-            fds = self.disentangler(x, domain=True)
+            fcs = self.encoder(x, domain=False)
+            fds = self.encoder(x, domain=True)
             rec = self.reconstructor(torch.cat(fcs, fds))
             return x, rec
-        elif state == None:
+
+        '''Test part'''
+        if state == None:
             # Testing part
             cmp.set_requires_grad(self.feature_extractor, requires_grad=False)
-            cmp.set_requires_grad(self.disentangler, requires_grad=False)
+            cmp.set_requires_grad(self.encoder, requires_grad=False)
             cmp.set_requires_grad(self.category_classifier, requires_grad=False)
             x = self.feature_extractor(x)
-            x = self.disentangler(x, domain=False)
+            x = self.encoder(x, domain=False)
             x = self.category_classifier(x)
             return x

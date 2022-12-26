@@ -26,47 +26,45 @@ class FeatureExtractor(nn.Module):
             x = x.unsqueeze(0)
         return x
 
-class Disentangler(nn.Module):
+class Encoder(nn.Module):
     def __init__(self):
-        super(Disentangler, self).__init__()
-        self.discriminator = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.ReLU(),
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Linear(128, 64),
-            nn.ReLU(),
-            nn.Linear(64, 32)
-        )
+        super(Encoder, self).__init__()
         self.category_encoder = nn.Sequential(
-            nn.Linear(32, 32),
-            nn.BatchNorm1d(32),
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
             nn.ReLU(),
 
-            nn.Linear(32, 32),
-            nn.BatchNorm1d(32),
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(128),
             nn.ReLU(),
 
-            nn.Linear(32, 32),
+            nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+
+            nn.Linear(64, 32),
             nn.BatchNorm1d(32),
             nn.ReLU()
         )
         self.domain_encoder = nn.Sequential(
-            nn.Linear(32, 32),
-            nn.BatchNorm1d(32),
+            nn.Linear(512, 256),
+            nn.BatchNorm1d(256),
             nn.ReLU(),
 
-            nn.Linear(32, 32),
-            nn.BatchNorm1d(32),
+            nn.Linear(256, 128),
+            nn.BatchNorm1d(128),
             nn.ReLU(),
 
-            nn.Linear(32, 32),
+            nn.Linear(128, 64),
+            nn.BatchNorm1d(64),
+            nn.ReLU(),
+
+            nn.Linear(64, 32),
             nn.BatchNorm1d(32),
             nn.ReLU()
         )
 
     def forward(self, x, domain=False):
-        x = self.discriminator(x)
         if domain == False:
             x = self.category_encoder(x)
         else:

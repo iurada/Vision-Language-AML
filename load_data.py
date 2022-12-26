@@ -178,6 +178,9 @@ def build_splits_domain_disentangle(opt):
             else:
                 val_examples_target.append([example, category, 1])
 
+    train_examples = train_examples_source + train_examples_target
+    val_examples = val_examples_source + val_examples_target
+
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
 
@@ -196,14 +199,14 @@ def build_splits_domain_disentangle(opt):
         normalize
     ])
 
-    # Dataloaders
-    train_loader_1 = DataLoader(PACSDatasetDomainDisentangle(train_examples_source, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True) 
-    train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples_target, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+    # Dataloaders 
+    train_loader_1 = DataLoader(PACSDatasetDomainDisentangle(train_examples_source, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
     val_loader_1 = DataLoader(PACSDatasetDomainDisentangle(val_examples_source, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
-    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples_target, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
     test_loader = DataLoader(PACSDatasetDomainDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
 
-    return train_loader_1, train_loader_2, val_loader_1, val_loader_2, test_loader
+    return train_loader_1, val_loader_1, train_loader_2, val_loader_2, test_loader
 
 class PACSDatasetClipDisentangle(Dataset):
     def __init__(self, examples, transform):

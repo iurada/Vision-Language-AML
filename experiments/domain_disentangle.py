@@ -116,6 +116,11 @@ class DomainDisentangleExperiment: # See point 2. of the project
                     pred = torch.argmax(logits[1], dim=-1)
                     accuracy += (pred == logits[0]).sum().item()
                     count += x.size(0)
+                elif state == None:
+                    loss += self.criterion(logits, y)
+                    pred = torch.argmax(logits, dim=-1)
+                    accuracy += (pred == y).sum().item()
+                    count += x.size(0)
 
         mean_accuracy = accuracy / count
         mean_loss = loss / count
