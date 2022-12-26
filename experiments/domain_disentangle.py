@@ -49,12 +49,12 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         logits = self.model(x, state, train=True)
 
-        if state == 'category_disentanglement_phase_1':
+        if state == 'phase_1_category_disentanglement':
             loss = self.criterion_1(logits, y) # Minimize loss
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-        elif state == 'domain_disentanglement_phase_1':
+        elif state == 'phase_1_domain_disentanglement':
             loss = self.criterion_1(logits, domain) # Minimize loss
             self.optimizer.zero_grad()
             loss.backward()
