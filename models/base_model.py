@@ -91,7 +91,7 @@ class DomainDisentangleModel(nn.Module):
             fds = self.encoder(x, domain=True) # Domain encoder
             dclf = self.domain_classifier(fcs)
             cclf = self.category_classifier(fds)
-            rec = self.reconstructor(torch.cat(fds, fcs))
+            rec = self.reconstructor(torch.cat((fds, fcs), 1))
             return dclf, cclf, rec, x
         if state == 'phase_2' and train == False:
             # Validation
@@ -104,7 +104,7 @@ class DomainDisentangleModel(nn.Module):
             fds = self.encoder(x, domain=True) # Domain encoder
             dclf = self.domain_classifier(fcs)
             cclf = self.category_classifier(fds)
-            rec = self.reconstructor(torch.cat(fds, fcs))
+            rec = self.reconstructor(torch.cat((fds, fcs), 1))
             return dclf, cclf, rec, x
 
         '''Test part'''

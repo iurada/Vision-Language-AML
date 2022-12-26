@@ -87,22 +87,22 @@ class DomainDisentangleExperiment: # See point 2. of the project
                 logits = self.model(x, state, train=False)
 
                 if state == 'phase_1_category_disentanglement':
-                    loss += self.criterion(logits, y)
+                    loss += self.criterion_1(logits, y)
                     pred = torch.argmax(logits, dim=-1)
                     accuracy += (pred == y).sum().item()
                     count += x.size(0)
                 elif state == 'phase_1_domain_disentanglement':
-                    loss += self.criterion(logits, domain)
+                    loss += self.criterion_1(logits, domain)
                     pred = torch.argmax(logits, dim=-1)
                     accuracy += (pred == domain).sum().item()
                     count += x.size(0)
                 elif state == 'phase_2':
-                    loss += self.criterion(logits[1], y)
+                    loss += self.criterion_1(logits[1], y)
                     pred = torch.argmax(logits[1], dim=-1)
                     accuracy += (pred == y).sum().item()
                     count += x.size(0)
                 elif state == None:
-                    loss += self.criterion(logits, y)
+                    loss += self.criterion_1(logits, y)
                     pred = torch.argmax(logits, dim=-1)
                     accuracy += (pred == y).sum().item()
                     count += x.size(0)
