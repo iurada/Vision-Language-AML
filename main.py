@@ -78,10 +78,11 @@ def main(opt):
             print('Pre-training')
             # Train loops 
             while iteration < 100:
-                for data in zip(train_loader_1, train_loader_2):
-                    total_train_loss += experiment.train_iteration(data[0], state='phase_1_category_disentanglement')
-                    total_train_loss += experiment.train_iteration(data[1], state='phase_1_domain_disentanglement')
-                    
+                if iteration < 30:
+                    for data in zip(train_loader_1, train_loader_2):
+                        total_train_loss += experiment.train_iteration(data[0], state='phase_1_category_disentanglement')
+                        total_train_loss += experiment.train_iteration(data[1], state='phase_1_domain_disentanglement')
+                        
                     if iteration % 1 == 0:
                         print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
 
@@ -91,9 +92,29 @@ def main(opt):
                         print(f'(Minimize) PHASE 1 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                         val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_1_domain_disentanglement')
                         print(f'(Minimize) PHASE 1 DOM [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
+                else:
+                    total_train_loss_ = 0
+                    for data in train_loader_2:
+                        total_train_loss_ += experiment.train_iteration(data, state='phase_2')
+                    
+                    if iteration % opt['print_every'] == 0:
+                        print(f'[TRAIN - {iteration}] Loss: {total_train_loss_ / (iteration + 1)}')
+
+                    if iteration % 10 == 0:
+                        # Run validations
+                        val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_2')
+                        print(f'(Maximize) PHASE 2 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
+                
                 iteration += 1
                 if iteration > opt['max_iterations']:
                     break
+
+            # Test
+            # experiment.load_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth')
+            test_accuracy, _ = experiment.validate(test_loader, state=None)
+            logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
+            print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
+            
             '''
             total_train_loss = 0
             iteration = 0

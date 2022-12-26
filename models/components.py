@@ -53,7 +53,7 @@ class CategoryEncoder(nn.Module):
 
 class DomainEncoder(nn.Module):
     def __init__(self):
-        super(DomainEncoder).__init__()
+        super(DomainEncoder, self).__init__()
         self.domain_encoder = nn.Sequential(
             nn.Linear(512, 256),
             nn.BatchNorm1d(256),
