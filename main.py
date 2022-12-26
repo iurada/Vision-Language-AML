@@ -75,27 +75,42 @@ def main(opt):
             print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
 
         elif opt['experiment'] == 'domain_disentangle':
-            print('Train loop')
-            # Train loop 
-            while iteration < opt['max_iterations']:
+            print('Pre-training')
+            # Train loops 
+            while iteration < 500:
                 for data in train_loader_1:
                     # Only source data
                     total_train_loss += experiment.train_iteration(data, state='phase_1_category_disentanglement')
-
                 for data in train_loader_2:
                     # Source + target data
                     total_train_loss += experiment.train_iteration(data, state='phase_1_domain_disentanglement')
-                    total_train_loss += experiment.train_iteration(data, state='phase_2')
 
                 if iteration % opt['print_every'] == 0:
                     print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
-
-                if iteration % opt['validate_every'] == 0:
+                
+                if iteration % 10 == 0:
                     # Run validations
                     val_accuracy, val_loss = experiment.validate(val_loader_1, state='phase_1_category_disentanglement')
                     print(f'(Minimize) PHASE 1 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                     val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_1_domain_disentanglement')
                     print(f'(Minimize) PHASE 1 DOM [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
+                iteration += 1
+                if iteration > opt['max_iterations']:
+                    break
+        
+            total_train_loss = 0
+            iteration = 0
+            print('Training')
+            while iteration < 500:
+                for data in train_loader_2:
+                    # Source + target data
+                    total_train_loss += experiment.train_iteration(data, state='phase_2')
+
+                if iteration % opt['print_every'] == 0:
+                    print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
+
+                if iteration % 10 == 0:
+                    # Run validations
                     val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_2')
                     print(f'(Maximize) PHASE 2 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                     
