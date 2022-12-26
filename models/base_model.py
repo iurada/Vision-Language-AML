@@ -73,6 +73,6 @@ class DomainDisentangleModel(nn.Module):
         if state == None:
             # Testing part
             x = self.feature_extractor(x)
-            x = self.category_encoder(x, domain=False)
+            x = self.category_encoder(x)
             x = self.category_classifier(x)
             return x
