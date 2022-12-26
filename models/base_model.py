@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from components import * 
+from models.components import * 
 
 class BaselineModel(nn.Module):
     def __init__(self):
