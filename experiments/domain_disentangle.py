@@ -59,21 +59,16 @@ class DomainDisentangleExperiment: # See point 2. of the project
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-        elif state == 'category_disentanglement_phase_2':
-            loss = -self.criterion_1(logits, y) # Maximize loss
+        elif state == 'phase_2':
+            loss_1 = -self.criterion_1(logits[0], domain) # Maximize loss
+            loss_2 = -self.criterion_1(logits[1], y) # Maximize loss
+            loss_3 = self.criterion_2(logits[2], logits[3]) # Minimize loss
             self.optimizer.zero_grad()
-            loss.backward()
+            loss_1.backward(retain_graph=True)
+            loss_2.backward(retain_graph=True)
+            loss_3.backward(retain_graph=True)
             self.optimizer.step()
-        elif state == 'domain_disentanglement_phase_2':
-            loss = -self.criterion_1(logits, domain) # Maximize loss
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
-        elif state == "feature_reconstruction":
-            loss = self.criterion_1(logits[0], logits[1]) # Minimize loss
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+            loss = loss_1 + loss_2 + loss_3
         
         return loss.item()
 
@@ -91,30 +86,20 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
                 logits = self.model(x, state, train=False)
 
-                if state == 'category_disentanglement_phase_1':
+                if state == 'phase_1_category_disentanglement':
                     loss += self.criterion(logits, y)
                     pred = torch.argmax(logits, dim=-1)
                     accuracy += (pred == y).sum().item()
                     count += x.size(0)
-                elif state == 'domain_disentanglement_phase_1':
+                elif state == 'phase_1_domain_disentanglement':
                     loss += self.criterion(logits, domain)
                     pred = torch.argmax(logits, dim=-1)
                     accuracy += (pred == domain).sum().item()
                     count += x.size(0)
-                elif state == 'category_disentanglement_phase_2':
-                    loss += self.criterion(logits, y)
-                    pred = torch.argmax(logits, dim=-1)
-                    accuracy += (pred == y).sum().item()
-                    count += x.size(0)
-                elif state == 'domain_disentanglement_phase_2':
-                    loss += self.criterion(logits, domain)
-                    pred = torch.argmax(logits, dim=-1)
-                    accuracy += (pred == domain).sum().item()
-                    count += x.size(0)
-                elif state == 'feature_reconstruction':
-                    loss += self.criterion(logits[0], logits[1])
+                elif state == 'phase_2':
+                    loss += self.criterion(logits[1], y)
                     pred = torch.argmax(logits[1], dim=-1)
-                    accuracy += (pred == logits[0]).sum().item()
+                    accuracy += (pred == y).sum().item()
                     count += x.size(0)
                 elif state == None:
                     loss += self.criterion(logits, y)

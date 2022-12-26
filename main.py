@@ -80,30 +80,24 @@ def main(opt):
             while iteration < opt['max_iterations']:
                 for data in train_loader_1:
                     # Only source data
-                    total_train_loss += experiment.train_iteration(data, state='category_disentanglement_phase_1')
+                    total_train_loss += experiment.train_iteration(data, state='phase_1_category_disentanglement')
 
                 for data in train_loader_2:
-                    # Soruce + target data
-                    total_train_loss += experiment.train_iteration(data, state='domain_disentanglement_phase_1')
-                    total_train_loss += experiment.train_iteration(data, state='category_disentanglement_phase_2')
-                    total_train_loss += experiment.train_iteration(data, state='domain_disentanglement_phase_2')
-                    total_train_loss += experiment.train_iteration(data, state='feature_reconstruction')
+                    # Source + target data
+                    total_train_loss += experiment.train_iteration(data, state='phase_1_domain_disentanglement')
+                    total_train_loss += experiment.train_iteration(data, state='phase_2')
 
                 if iteration % opt['print_every'] == 0:
                     print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
 
                 if iteration % opt['validate_every'] == 0:
                     # Run validations
-                    val_accuracy, val_loss = experiment.validate(val_loader_1, state='category_disentanglement_phase_1')
-                    print(f'(Minimize) CAT DIS 1 [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
-                    val_accuracy, val_loss = experiment.validate(val_loader_2, state='domain_disentanglement_phase_1')
-                    print(f'(Minimize) DOM DIS 1 [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
-                    val_accuracy, val_loss = experiment.validate(val_loader_2, state='category_disentanglement_phase_2')
-                    print(f'(Maximize) CAT DIS 2 [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
-                    val_accuracy, val_loss = experiment.validate(val_loader_2, state='domain_disentanglement_phase_2')
-                    print(f'(Maximize) DOM DIS 2 [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
-                    val_accuracy, val_loss = experiment.validate(val_loader_2, state='feature_reconstruction')
-                    print(f'(Minimize) REC [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
+                    val_accuracy, val_loss = experiment.validate(val_loader_1, state='phase_1_category_disentanglement')
+                    print(f'(Minimize) PHASE 1 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
+                    val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_1_domain_disentanglement')
+                    print(f'(Minimize) PHASE 1 DOM [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
+                    val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_2')
+                    print(f'(Maximize) PHASE 2 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                     
                     '''
                     if val_accuracy > best_accuracy:

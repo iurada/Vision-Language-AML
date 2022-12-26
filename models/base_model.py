@@ -40,7 +40,7 @@ class DomainDisentangleModel(nn.Module):
     def forward(self, x, state=None, train=True):
 
         '''Train and validation parts for category encoder's first step'''
-        if state == 'category_disentanglement_phase_1' and train == True:
+        if state == 'phase_1_category_disentanglement' and train == True:
             # Loss for category classifier to minimize
             set_requires_grad(self.feature_extractor, requires_grad=True)
             set_requires_grad(self.encoder, requires_grad=True)
@@ -49,7 +49,7 @@ class DomainDisentangleModel(nn.Module):
             x = self.encoder(x, domain=False) # Category encoder
             x = self.category_classifier(x)
             return x
-        if state == 'category_disentanglement_phase_1' and train == False:
+        if state == 'phase_1_category_disentanglement' and train == False:
             # Validation
             set_requires_grad(self.feature_extractor, requires_grad=False)
             set_requires_grad(self.encoder, requires_grad=False)
@@ -60,7 +60,7 @@ class DomainDisentangleModel(nn.Module):
             return x
 
         '''Train and validation parts for domain encoder's first step'''
-        if state == 'domain_disentanglement_phase_1' and train == True:
+        if state == 'phase_1_domain_disentanglement' and train == True:
             # Loss for domain classifier to minimize
             set_requires_grad(self.feature_extractor, requires_grad=True)
             set_requires_grad(self.encoder, requires_grad=True)
@@ -69,7 +69,7 @@ class DomainDisentangleModel(nn.Module):
             x = self.encoder(x, domain=True) # Domain encoder
             x = self.domain_classifier(x)
             return x
-        if state == 'domain_disentanglement_phase_1' and train == False:
+        if state == 'phase_1_domain_disentanglement' and train == False:
             # Validation
             set_requires_grad(self.feature_extractor, requires_grad=False)
             set_requires_grad(self.encoder, requires_grad=False)
@@ -79,67 +79,33 @@ class DomainDisentangleModel(nn.Module):
             x = self.domain_classifier(x)
             return x
 
-        '''Train and validation parts for category encoder's second step'''
-        if state == 'category_disentanglement_phase_2' and train == True:
-            # Loss for domain classifier to maximize
-            set_requires_grad(self.feature_extractor, requires_grad=True)
-            set_requires_grad(self.encoder, requires_grad=True)
-            set_requires_grad(self.domain_classifier, requires_grad=False)
-            x = self.feature_extractor(x)
-            x = self.encoder(x, domain=False) # Category encoder
-            x = self.domain_classifier(x)
-            return x
-        if state == 'category_disentanglement_phase_2' and train == False:
-            # Validation
-            set_requires_grad(self.feature_extractor, requires_grad=False)
-            set_requires_grad(self.disentangler, requires_grad=False)
-            set_requires_grad(self.domain_classifier, requires_grad=False)
-            x = self.feature_extractor(x)
-            x = self.disentangler(x, domain=False) # Category encoder
-            x = self.domain_classifier(x)
-            return x
-        
-        '''Train and validation parts for domain encoder's second step'''
-        if state == 'domain_disentanglement_phase_2' and train == True:
-            # Loss for category classifier to maximize
+        '''Train and validation parts for second steps'''
+        if state == 'phase2' and train == True:
+            # Training
             set_requires_grad(self.feature_extractor, requires_grad=True)
             set_requires_grad(self.encoder, requires_grad=True)
             set_requires_grad(self.category_classifier, requires_grad=False)
+            set_requires_grad(self.domain_classifier, requires_grad=False)
             x = self.feature_extractor(x)
-            x = self.encoder(x, domain=True) # Domain encoder
-            x = self.category_classifier(x)
-            return x
-        if state == 'domain_disentanglement_phase_2' and train == False:
+            fcs = self.encoder(x, domain=False) # Category encoder
+            fds = self.encoder(x, domain=True) # Domain encoder
+            dclf = self.domain_classifier(fcs)
+            cclf = self.category_classifier(fds)
+            rec = self.reconstructor(torch.cat(fds, fcs))
+            return dclf, cclf, rec, x
+        if state == 'phase_2' and train == False:
             # Validation
             set_requires_grad(self.feature_extractor, requires_grad=False)
             set_requires_grad(self.encoder, requires_grad=False)
             set_requires_grad(self.category_classifier, requires_grad=False)
+            set_requires_grad(self.domain_classifier, requires_grad=False)
             x = self.feature_extractor(x)
-            x = self.encoder(x, domain=True) # Domain encoder
-            x = self.category_classifier(x)
-            return x
-
-        '''Train and validation parts for reconstructor'''
-        if state == "feature_reconstruction" and train == True:
-            # Loss for reconstructor to minimize
-            set_requires_grad(self.feature_extractor, requires_grad=True)
-            set_requires_grad(self.encoder, requires_grad=True)
-            set_requires_grad(self.reconstructor, requires_grad=True)
-            x = self.feature_extractor(x)
-            fcs = self.encoder(x, domain=False)
-            fds = self.encoder(x, domain=True)
-            rec = self.reconstructor(torch.cat(fcs, fds))
-            return x, rec
-        if state == "feature_reconstruction" and train == False:
-            # Validation
-            set_requires_grad(self.feature_extractor, requires_grad=False)
-            set_requires_grad(self.encoder, requires_grad=False)
-            set_requires_grad(self.reconstructor, requires_grad=False)
-            x = self.feature_extractor(x)
-            fcs = self.encoder(x, domain=False)
-            fds = self.encoder(x, domain=True)
-            rec = self.reconstructor(torch.cat(fcs, fds))
-            return x, rec
+            fcs = self.encoder(x, domain=False) # Category encoder
+            fds = self.encoder(x, domain=True) # Domain encoder
+            dclf = self.domain_classifier(fcs)
+            cclf = self.category_classifier(fds)
+            rec = self.reconstructor(torch.cat(fds, fcs))
+            return dclf, cclf, rec, x
 
         '''Test part'''
         if state == None:
