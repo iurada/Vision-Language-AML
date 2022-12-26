@@ -26,9 +26,9 @@ class FeatureExtractor(nn.Module):
             x = x.unsqueeze(0)
         return x
 
-class Encoder(nn.Module):
+class CategoryEncoder(nn.Module):
     def __init__(self):
-        super(Encoder, self).__init__()
+        super(CategoryEncoder, self).__init__()
         self.category_encoder = nn.Sequential(
             nn.Linear(512, 256),
             nn.BatchNorm1d(256),
@@ -46,6 +46,14 @@ class Encoder(nn.Module):
             nn.BatchNorm1d(32),
             nn.ReLU()
         )
+
+    def forward(self, x):
+        x = self.category_encoder(x)
+        return x
+
+class DomainEncoder(nn.Module):
+    def __init__(self):
+        super(DomainEncoder).__init__()
         self.domain_encoder = nn.Sequential(
             nn.Linear(512, 256),
             nn.BatchNorm1d(256),
@@ -63,12 +71,8 @@ class Encoder(nn.Module):
             nn.BatchNorm1d(32),
             nn.ReLU()
         )
-
-    def forward(self, x, domain=False):
-        if domain == False:
-            x = self.category_encoder(x)
-        else:
-            x = self.domain_encoder(x)
+    def forward(self, x):
+        x = self.domain_encoder(x)
         return x
 
 class CategoryClassifier(nn.Module):

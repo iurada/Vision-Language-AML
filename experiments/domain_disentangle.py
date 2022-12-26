@@ -11,6 +11,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.model = DomainDisentangleModel()
         self.model.train()
         self.model.to(self.device)
+        for param in self.model.parameters():
+            param.requires_grad = True
 
         # Setup optimization procedure
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
@@ -47,7 +49,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        logits = self.model(x, state, train=True)
+        logits = self.model(x, state)
 
         if state == 'phase_1_category_disentanglement':
             loss = self.criterion_1(logits, y) # Minimize loss
@@ -60,8 +62,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
             loss.backward()
             self.optimizer.step()
         elif state == 'phase_2':
-            loss_1 = -self.criterion_1(logits[0], domain) # Maximize loss
-            loss_2 = -self.criterion_1(logits[1], y) # Maximize loss
+            loss_1 = -self.criterion_1(logits[0], y) # Maximize loss
+            loss_2 = -self.criterion_1(logits[1], domain) # Maximize loss
             loss_3 = self.criterion_2(logits[2], logits[3]) # Minimize loss
             self.optimizer.zero_grad()
             loss_1.backward(retain_graph=True)
@@ -84,7 +86,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
                 y = y.to(self.device)
                 domain = domain.to(self.device)
 
-                logits = self.model(x, state, train=False)
+                logits = self.model(x, state)
 
                 if state == 'phase_1_category_disentanglement':
                     loss += self.criterion_1(logits, y)
@@ -97,8 +99,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
                     accuracy += (pred == domain).sum().item()
                     count += x.size(0)
                 elif state == 'phase_2':
-                    loss += self.criterion_1(logits[1], y)
-                    pred = torch.argmax(logits[1], dim=-1)
+                    loss += self.criterion_1(logits[0], y)
+                    pred = torch.argmax(logits[0], dim=-1)
                     accuracy += (pred == y).sum().item()
                     count += x.size(0)
                 elif state == None:
