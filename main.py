@@ -78,12 +78,11 @@ def main(opt):
             print('Pre-training')
             # Train loops 
             while iteration < 500:
-                for data in train_loader_1:
+                for data in zip(train_loader_1, train_loader_2):
                     # Only source data
-                    total_train_loss += experiment.train_iteration(data, state='phase_1_category_disentanglement')
-                for data in train_loader_2:
+                    total_train_loss += experiment.train_iteration(data[1], state='phase_1_category_disentanglement')
                     # Source + target data
-                    total_train_loss += experiment.train_iteration(data, state='phase_1_domain_disentanglement')
+                    total_train_loss += experiment.train_iteration(data[0], state='phase_1_domain_disentanglement')
 
                 if iteration % opt['print_every'] == 0:
                     print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
