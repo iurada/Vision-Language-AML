@@ -103,7 +103,7 @@ def main(opt):
                     
                     if val_accuracy > best_accuracy_dclf:
                         print('Saving model...')
-                        best_accuracy_cclf = val_accuracy
+                        best_accuracy_dclf = val_accuracy
                         experiment.save_model('dclf', 'trained_models/dclf.pt')
             
                 iteration += 1
@@ -134,38 +134,6 @@ def main(opt):
             logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             
-            '''
-            total_train_loss = 0
-            iteration = 0
-            print('Training')
-            while iteration < 50:
-                for data in train_loader_2:
-                    # Source + target data
-                    total_train_loss += experiment.train_iteration(data, state='phase_2')
-
-                if iteration % opt['print_every'] == 0:
-                    print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
-
-                if iteration % 10 == 0:
-                    # Run validations
-                    val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_2')
-                    print(f'(Maximize) PHASE 2 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
-                    
-                    
-                    if val_accuracy > best_accuracy:
-                        experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss)
-                    experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
-                    
-                iteration += 1
-                if iteration > opt['max_iterations']:
-                    break
-
-            # Test
-            # experiment.load_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth')
-            test_accuracy, _ = experiment.validate(test_loader, state=None)
-            logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
-            print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
-            '''
 
 if __name__ == '__main__':
     
