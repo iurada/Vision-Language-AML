@@ -86,7 +86,7 @@ def main(opt):
                     if iteration % 1 == 0:
                         print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
 
-                    if iteration % 10 == 0:
+                    if iteration % 2 == 0:
                         # Run validations
                         val_accuracy, val_loss = experiment.validate(val_loader_1, state='phase_1_category_disentanglement')
                         print(f'(Minimize) PHASE 1 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
@@ -97,10 +97,10 @@ def main(opt):
                     for data in train_loader_2:
                         total_train_loss_ += experiment.train_iteration(data, state='phase_2')
                     
-                    if iteration % opt['print_every'] == 0:
+                    if iteration % 1 == 0:
                         print(f'[TRAIN - {iteration}] Loss: {total_train_loss_ / (iteration + 1)}')
 
-                    if iteration % 10 == 0:
+                    if iteration % 2 == 0:
                         # Run validations
                         val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_2')
                         print(f'(Maximize) PHASE 2 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
