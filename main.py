@@ -109,7 +109,8 @@ def main(opt):
                 iteration += 1
                 if iteration > opt['max_iterations']:
                     break
-            
+                
+            iteration = 0
             print("Training")
             while iteration < 30:
                 total_train_loss_ = 0
