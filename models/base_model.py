@@ -38,7 +38,7 @@ class DomainDisentangleModel(nn.Module):
         self.domain_classifier = DomainClassifier()
         self.reconstructor = Reconstructor()
 
-    def forward(self, x, state=None):
+    def forward(self, x, state):
 
         '''Train and validation parts for category encoder's first step'''
         if state == 'phase_1_category_disentanglement':
@@ -59,23 +59,23 @@ class DomainDisentangleModel(nn.Module):
         '''Train and validation parts for second steps'''
         if state == 'phase_2':
             # Training
-            cclf = self.category_classifier.load_state_dict(torch.load('trained_models/cclf.pt'))
-            dclf = self.domain_classifier.load_state_dict(torch.load('trained_models/dclf.pt'))
-            set_requires_grad(cclf, requires_grad=False) # Freeze category classifier
-            set_requires_grad(dclf, requires_grad=False) # Freeze domain classifier
+            self.category_classifier.load_state_dict(torch.load('trained_models/cclf.pt'))
+            self.domain_classifier.load_state_dict(torch.load('trained_models/dclf.pt'))
+            set_requires_grad(self.category_classifier, requires_grad=False) # Freeze category classifier
+            set_requires_grad(self.domain_classifier, requires_grad=False) # Freeze domain classifier
             x = self.feature_extractor(x)
             fcs = self.category_encoder(x) # Category encoder
             fds = self.domain_encoder(x) # Domain encoder
-            cl = cclf(fds)
-            dl = dclf(fcs)
+            cl = self.category_classifier(fds)
+            dl = self.domain_classifier(fcs)
             rec = self.reconstructor(torch.cat((fds, fcs), 1))
             return cl, dl, rec, x
 
         '''Test part'''
         if state == None:
             # Testing part
-            cclf = self.category_classifier.load_state_dict(torch.load('trained_models/cclf.pt'))
+            self.category_classifier.load_state_dict(torch.load('trained_models/cclf.pt'))
             x = self.feature_extractor(x)
             x = self.category_encoder(x)
-            x = cclf(x)
+            x = self.category_classifier(x)
             return x
