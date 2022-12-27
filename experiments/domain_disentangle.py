@@ -19,11 +19,10 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.criterion_1 = torch.nn.CrossEntropyLoss()
         self.criterion_2 = torch.nn.MSELoss()
 
-    def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
+    def save_checkpoint(self, path, iteration, total_train_loss):
         checkpoint = {}
 
         checkpoint['iteration'] = iteration
-        checkpoint['best_accuracy'] = best_accuracy
         checkpoint['total_train_loss'] = total_train_loss
 
         checkpoint['model'] = self.model.state_dict()
@@ -35,22 +34,15 @@ class DomainDisentangleExperiment: # See point 2. of the project
         checkpoint = torch.load(path)
 
         iteration = checkpoint['iteration']
-        best_accuracy = checkpoint['best_accuracy']
         total_train_loss = checkpoint['total_train_loss']
 
         self.model.load_state_dict(checkpoint['model'])
         self.optimizer.load_state_dict(checkpoint['optimizer'])
 
-        return iteration, best_accuracy, total_train_loss
+        return iteration, total_train_loss
     
-    def loadAndFreeze(self):
-        self.model.loadAndFreeze()
-
-    def save_model(self, type, path):
-        if type == 'cclf':
-            torch.save(self.model.category_classifier.state_dict(), path)
-        elif type == 'dclf':
-            torch.save(self.model.domain_classifier.state_dict(), path)
+    def freeze(self):
+        self.model.freeze()
 
     def train_iteration(self, data, state):
         x, y, domain = data
@@ -60,12 +52,12 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         logits = self.model(x, state)
         #logits are cl, dl, rec, x
-        if state == 'phase_1_category_disentanglement':
+        if state == 'phase_1_cc':
             loss = self.criterion_1(logits, y) # Minimize loss
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-        elif state == 'phase_1_domain_disentanglement':
+        elif state == 'phase_1_dc':
             loss = self.criterion_1(logits, domain) # Minimize loss
             self.optimizer.zero_grad()
             loss.backward()
@@ -94,12 +86,12 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
                 logits = self.model(x, state)
 
-                if state == 'phase_1_category_disentanglement':
+                if state == 'phase_1_cc':
                     loss += self.criterion_1(logits, y)
                     pred = torch.argmax(logits, dim=-1)
                     accuracy += (pred == y).sum().item()
                     count += x.size(0)
-                elif state == 'phase_1_domain_disentanglement':
+                elif state == 'phase_1_dc':
                     loss += self.criterion_1(logits, domain)
                     pred = torch.argmax(logits, dim=-1)
                     accuracy += (pred == domain).sum().item()

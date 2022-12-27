@@ -78,38 +78,45 @@ def main(opt):
         elif opt['experiment'] == 'domain_disentangle':
             print('Pre-training')
             # Train loops 
-            best_accuracy_cclf = 0
-            best_accuracy_dclf = 0
+            best_train_loss = 1000
             while iteration < 500:
                 for data in zip(train_loader_1, train_loader_2):
-                    total_train_loss += experiment.train_iteration(data[0], state='phase_1_category_disentanglement')
-                    total_train_loss += experiment.train_iteration(data[1], state='phase_1_domain_disentanglement')
+                    total_train_loss += experiment.train_iteration(data[0], state='phase_1_cc')
+                    total_train_loss += experiment.train_iteration(data[1], state='phase_1_dc')
+
+                    if total_train_loss < best_train_loss:
+                        best_train_loss = total_train_loss
+                        experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, total_train_loss)
                     
                     if iteration % 1 == 0:
                         print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
 
                     if iteration % 2 == 0:
                         # Run validations
-                        val_accuracy, val_loss = experiment.validate(val_loader_1, state='phase_1_category_disentanglement')
-                        print(f'(Minimize) PHASE 1 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
-                    
+                        val_accuracy_cc, val_loss = experiment.validate(val_loader_1, state='phase_1_cc')
+                        print(f'(Minimize) PHASE 1 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy_cc):.2f}')
 
-                        val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_1_domain_disentanglement')
-                        print(f'(Minimize) PHASE 1 DOM [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
+                        val_accuracy_dc, val_loss = experiment.validate(val_loader_2, state='phase_1_dc')
+                        print(f'(Minimize) PHASE 1 DOM [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy_dc):.2f}')
                         
-            
                     iteration += 1
                     if iteration > 500:
                         break
                 
             iteration = 0
             print("Training")
-            experiment.loadAndFreeze()
+            experiment.load_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth')
+            experiment.freeze()
+            best_train_loss = 1000
             while iteration < 500:
                 total_train_loss_ = 0
                 for data in train_loader_2:
                     total_train_loss_ += experiment.train_iteration(data, state='phase_2')
-                
+
+                    if total_train_loss < best_train_loss:
+                        best_train_loss = total_train_loss
+                        experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, total_train_loss)
+
                     if iteration % 1 == 0:
                         print(f'[TRAIN - {iteration}] Loss: {total_train_loss_ / (iteration + 1)}')
 
@@ -123,7 +130,7 @@ def main(opt):
                         break
 
             # Test
-            # experiment.load_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth')
+            experiment.load_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth')
             test_accuracy, _ = experiment.validate(test_loader, state=None)
             logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
