@@ -42,6 +42,12 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.optimizer.load_state_dict(checkpoint['optimizer'])
 
         return iteration, best_accuracy, total_train_loss
+    
+    def save_model(self, type, path):
+        if type == 'cclf':
+            torch.save(self.model.category_classifier.state_dict(), path)
+        elif type == 'dclf':
+            torch.save(self.model.domain_classifier.state_dict(), path)
 
     def train_iteration(self, data, state):
         x, y, domain = data
