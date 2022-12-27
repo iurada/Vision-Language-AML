@@ -39,8 +39,8 @@ class DomainDisentangleModel(nn.Module):
         self.reconstructor = Reconstructor()
 
     def loadAndFreeze(self):
-        self.category_classifier.load_state_dict(torch.load('trained_models/cclf.pt'))
-        self.domain_classifier.load_state_dict(torch.load('trained_models/dclf.pt'))
+        #self.category_classifier.load_state_dict(torch.load('trained_models/cclf.pt'))
+        #self.domain_classifier.load_state_dict(torch.load('trained_models/dclf.pt'))
         set_requires_grad(self.category_classifier, requires_grad=False) # Freeze category classifier
         set_requires_grad(self.domain_classifier, requires_grad=False) # Freeze domain classifier
 

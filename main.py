@@ -92,19 +92,11 @@ def main(opt):
                         # Run validations
                         val_accuracy, val_loss = experiment.validate(val_loader_1, state='phase_1_category_disentanglement')
                         print(f'(Minimize) PHASE 1 CAT [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
-                        
-                        if val_accuracy > best_accuracy_cclf:
-                            print('Saving model...')
-                            best_accuracy_cclf = val_accuracy
-                            experiment.save_model('cclf', 'trained_models/cclf.pt')
+                    
 
                         val_accuracy, val_loss = experiment.validate(val_loader_2, state='phase_1_domain_disentanglement')
                         print(f'(Minimize) PHASE 1 DOM [VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                         
-                        if val_accuracy > best_accuracy_dclf:
-                            print('Saving model...')
-                            best_accuracy_dclf = val_accuracy
-                            experiment.save_model('dclf', 'trained_models/dclf.pt')
             
                     iteration += 1
                     if iteration > 500:
