@@ -43,6 +43,9 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         return iteration, best_accuracy, total_train_loss
     
+    def loadAndFreeze(self):
+        self.model.loadAndFreeze()
+
     def save_model(self, type, path):
         if type == 'cclf':
             torch.save(self.model.category_classifier.state_dict(), path)
@@ -56,7 +59,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         domain = domain.to(self.device)
 
         logits = self.model(x, state)
-
+        #logits are cl, dl, rec, x
         if state == 'phase_1_category_disentanglement':
             loss = self.criterion_1(logits, y) # Minimize loss
             self.optimizer.zero_grad()
@@ -71,13 +74,10 @@ class DomainDisentangleExperiment: # See point 2. of the project
             loss_1 = -self.criterion_1(logits[0], y) # Maximize loss
             loss_2 = -self.criterion_1(logits[1], domain) # Maximize loss
             loss_3 = self.criterion_2(logits[2], logits[3]) # Minimize loss
-            self.optimizer.zero_grad()
-            loss_1.backward(retain_graph=True)
-            loss_2.backward(retain_graph=True)
-            loss_3.backward(retain_graph=True)
-            self.optimizer.step()
             loss = loss_1 + loss_2 + loss_3
-        
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
         return loss.item()
 
 

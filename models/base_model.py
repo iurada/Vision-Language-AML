@@ -38,6 +38,12 @@ class DomainDisentangleModel(nn.Module):
         self.domain_classifier = DomainClassifier()
         self.reconstructor = Reconstructor()
 
+    def loadAndFreeze(self):
+        self.category_classifier.load_state_dict(torch.load('trained_models/cclf.pt'))
+        self.domain_classifier.load_state_dict(torch.load('trained_models/dclf.pt'))
+        set_requires_grad(self.category_classifier, requires_grad=False) # Freeze category classifier
+        set_requires_grad(self.domain_classifier, requires_grad=False) # Freeze domain classifier
+
     def forward(self, x, state):
 
         '''Train and validation parts for category encoder's first step'''
@@ -59,10 +65,6 @@ class DomainDisentangleModel(nn.Module):
         '''Train and validation parts for second steps'''
         if state == 'phase_2':
             # Training
-            self.category_classifier.load_state_dict(torch.load('trained_models/cclf.pt'))
-            self.domain_classifier.load_state_dict(torch.load('trained_models/dclf.pt'))
-            set_requires_grad(self.category_classifier, requires_grad=False) # Freeze category classifier
-            set_requires_grad(self.domain_classifier, requires_grad=False) # Freeze domain classifier
             x = self.feature_extractor(x)
             fcs = self.category_encoder(x) # Category encoder
             fds = self.domain_encoder(x) # Domain encoder
@@ -70,6 +72,7 @@ class DomainDisentangleModel(nn.Module):
             dl = self.domain_classifier(fcs)
             rec = self.reconstructor(torch.cat((fds, fcs), 1))
             return cl, dl, rec, x
+           
 
         '''Test part'''
         if state == None:
