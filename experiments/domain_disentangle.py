@@ -23,7 +23,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.criterion_EL = EntropyLoss()
 
         # Setup loss weights
-        self.weights = [1, 1, 1, 1, 1]
+        self.weights = [1, 2.591, 0.021, 0.594, 1.123]
 
     def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
         checkpoint = {}

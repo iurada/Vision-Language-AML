@@ -35,10 +35,12 @@ class EntropyLoss(nn.Module):
         if cat == False:
             exp = expected
             res = result
+            freq = 1/torch.bincount(exp, minlength=2)
         else:
             exp = expected[expected.ne(42).nonzero().squeeze()]
             res = result[expected.ne(42).nonzero().squeeze()]
-        freq = 1/torch.bincount(exp)
+            freq = 1/torch.bincount(exp, minlength=7)
+            
         freq = torch.nan_to_num(freq, nan=0, posinf=0, neginf=0)
         logs = torch.log_softmax(res, dim=1).sum(dim=0)
         b = freq*logs
