@@ -1,5 +1,7 @@
 import torch
+import torch.nn as nn
 from models.base_model import DomainDisentangleModel
+from models.components import *
 
 class DomainDisentangleExperiment: # See point 2. of the project
     
@@ -16,8 +18,12 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         # Setup optimization procedure
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
-        self.criterion_1 = torch.nn.CrossEntropyLoss()
-        self.criterion_2 = torch.nn.MSELoss()
+        self.criterion_CEL = torch.nn.CrossEntropyLoss(ignore_index=42)
+        self.criterion_MSEL = torch.nn.MSELoss()
+        self.criterion_EL = EntropyLoss()
+
+        # Setup loss weights
+        self.weights = [1, 1, 1, 1, 1]
 
     def save_checkpoint(self, path, iteration, total_train_loss):
         checkpoint = {}
@@ -40,40 +46,30 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.optimizer.load_state_dict(checkpoint['optimizer'])
 
         return iteration, total_train_loss
-    
-    def freeze(self):
-        self.model.freeze()
 
-    def train_iteration(self, data, state):
+    def train_iteration(self, data, train):
         x, y, domain = data
         x = x.to(self.device)
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        logits = self.model(x, state)
-        #logits are cl, dl, rec, x
-        if state == 'phase_1_cc':
-            loss = self.criterion_1(logits, y) # Minimize loss
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
-        elif state == 'phase_1_dc':
-            loss = self.criterion_1(logits, domain) # Minimize loss
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
-        elif state == 'phase_2':
-            loss_1 = -self.criterion_1(logits[0], y) # Maximize loss
-            loss_2 = -self.criterion_1(logits[1], domain) # Maximize loss
-            loss_3 = self.criterion_2(logits[2], logits[3]) # Minimize loss
-            loss = loss_1 + loss_2 + loss_3
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+        logits = self.model(x, train)
+
+        loss = 0
+        
+        loss += self.weights[0]*self.criterion_CEL(logits[0], y) # Category encoder + Category classifier
+        loss += self.weights[1]*self.criterion_CEL(logits[1], domain) # Domain encoder + Domain classifier
+        loss += self.weights[2]*self.criterion_EL(logits[2]) # Domain encoder + Category classifier
+        loss += self.weights[3]*self.criterion_EL(logits[3]) # Category encoder + Domain classifier
+        loss += self.weights[4]*self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
         return loss.item()
 
-
-    def validate(self, loader, state):
+    def validate(self, loader, train):
         self.model.eval()
         accuracy = 0
         count = 0
@@ -84,28 +80,13 @@ class DomainDisentangleExperiment: # See point 2. of the project
                 y = y.to(self.device)
                 domain = domain.to(self.device)
 
-                logits = self.model(x, state)
+                logits = self.model(x, train)
 
-                if state == 'phase_1_cc':
-                    loss += self.criterion_1(logits, y)
-                    pred = torch.argmax(logits, dim=-1)
-                    accuracy += (pred == y).sum().item()
-                    count += x.size(0)
-                elif state == 'phase_1_dc':
-                    loss += self.criterion_1(logits, domain)
-                    pred = torch.argmax(logits, dim=-1)
-                    accuracy += (pred == domain).sum().item()
-                    count += x.size(0)
-                elif state == 'phase_2':
-                    loss += self.criterion_1(logits[0], y)
-                    pred = torch.argmax(logits[0], dim=-1)
-                    accuracy += (pred == y).sum().item()
-                    count += x.size(0)
-                elif state == None:
-                    loss += self.criterion_1(logits, y)
-                    pred = torch.argmax(logits, dim=-1)
-                    accuracy += (pred == y).sum().item()
-                    count += x.size(0)
+                loss = self.weights[0]*self.criterion_CEL(logits[0], y) # Category encoder + Category classifier
+
+                pred = torch.argmax(logits, dim=-1)
+                accuracy += (pred == y).sum().item()
+                count += x.size(0)
 
         mean_accuracy = accuracy / count
         mean_loss = loss / count

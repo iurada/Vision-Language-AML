@@ -26,6 +26,16 @@ class FeatureExtractor(nn.Module):
             x = x.unsqueeze(0)
         return x
 
+class EntropyLoss(nn.Module):
+    def __init__(self):
+        super(EntropyLoss, self).__init__()
+
+    def forward(self, x):
+        b = F.log_softmax(x, dim=1)
+        b = -1.0 * b.sum()
+        b = b/b.size()[1]
+        return b
+
 class CategoryEncoder(nn.Module):
     def __init__(self):
         super(CategoryEncoder, self).__init__()

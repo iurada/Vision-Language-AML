@@ -116,9 +116,21 @@ class PACSDatasetDomainDisentangle(Dataset):
         return len(self.examples)
     
     def __getitem__(self, index):
-        img_path, y, domain = self.examples[index]
+        img_path = self.examples[index]["path"]
+        y = self.examples[index]["category"]
+        domain = self.examples[index]["domain"]
         x = self.transform(Image.open(img_path).convert('RGB'))
         return x, y, domain
+
+class DomainDisentangleDict():
+    def __init__(self, path, domain, category=42):
+        self.item = {
+            "path": path,
+            "category": category,
+            "domain": domain
+        }
+    def __getattribute__(self, __name: str):
+        return self.item[__name]
 
 def build_splits_domain_disentangle(opt):
     source_domain = 'art_painting'
@@ -143,18 +155,6 @@ def build_splits_domain_disentangle(opt):
     # Build splits - we train only on the source domain (Art Painting)
     target_val_split_length = target_total_examples * 0.2 # 20% of the training split used for validation
 
-    '''
-    tot_source = sum([len(v) for k,v in source_examples.items()])
-    tot_target = sum([len(v) for k,v in target_examples.items()])
-
-    domain_ratios = {
-        0: tot_source/(tot_source+tot_target),
-        1: tot_target/(tot_source+tot_target),
-    } 
-
-    domain_val_split_length = (tot_source+tot_target)*0.2
-    '''
-
     train_examples_source = []
     val_examples_source = []
     train_examples_target = []
@@ -163,21 +163,15 @@ def build_splits_domain_disentangle(opt):
 
     for category, examples_list in source_examples.items():
         split_idx = round(source_category_ratios[category] * source_val_split_length)
-        for i, example in enumerate(examples_list):
-            if i > split_idx:
-                train_examples_source.append([example, category, 0])
-            else:
-                val_examples_source.append([example, category, 0])
+        for i, example in enumerate(examples_list): 
+            train_examples_source.append(DomainDisentangleDict(example, 0, category)) if i>split_idx else val_examples_source.append(DomainDisentangleDict(example, 0, category))
     
     for category, examples_list in target_examples.items():
         split_idx = round(target_category_ratios[category] * target_val_split_length)
         for i, example in enumerate(examples_list):
-            test_examples.append([example, category, 1])
-            if i > split_idx:
-                train_examples_target.append([example, category, 1])
-            else:
-                val_examples_target.append([example, category, 1])
-
+            test_examples.append(DomainDisentangleDict(example, 1, category))
+            train_examples_target.append(DomainDisentangleDict(example, 1)) if i>split_idx else val_examples_target.append(DomainDisentangleDict(example, 1, category))
+                
     train_examples = train_examples_source + train_examples_target
     val_examples = val_examples_source + val_examples_target
 
@@ -200,13 +194,11 @@ def build_splits_domain_disentangle(opt):
     ])
 
     # Dataloaders 
-    train_loader_1 = DataLoader(PACSDatasetDomainDisentangle(train_examples_source, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    val_loader_1 = DataLoader(PACSDatasetDomainDisentangle(val_examples_source, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
-    train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    train_loader = DataLoader(PACSDatasetDomainDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+    val_loader = DataLoader(PACSDatasetDomainDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
     test_loader = DataLoader(PACSDatasetDomainDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
 
-    return train_loader_1, val_loader_1, train_loader_2, val_loader_2, test_loader
+    return train_loader, val_loader, test_loader
 
 class PACSDatasetClipDisentangle(Dataset):
     def __init__(self, examples, transform):

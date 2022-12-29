@@ -38,44 +38,20 @@ class DomainDisentangleModel(nn.Module):
         self.domain_classifier = DomainClassifier()
         self.reconstructor = Reconstructor()
 
-    def freeze(self):
-        set_requires_grad(self.category_classifier, requires_grad=False) # Freeze category classifier
-        set_requires_grad(self.domain_classifier, requires_grad=False) # Freeze domain classifier
+    def forward(self, x, train):
 
-    def forward(self, x, state):
-
-        '''Train and validation parts for category encoder's first step'''
-        if state == 'phase_1_cc':
-            # Loss for category classifier to minimize
-            x = self.feature_extractor(x)
-            x = self.category_encoder(x) 
-            x = self.category_classifier(x)
-            return x
-
-        '''Train and validation parts for domain encoder's first step'''
-        if state == 'phase_1_dc':
-            # Loss for domain classifier to minimize
-            x = self.feature_extractor(x)
-            x = self.domain_encoder(x) # Domain encoder
-            x = self.domain_classifier(x)
-            return x
-
-        '''Train and validation parts for second steps'''
-        if state == 'phase_2':
-            # Training
-            x = self.feature_extractor(x)
-            fcs = self.category_encoder(x) # Category encoder
-            fds = self.domain_encoder(x) # Domain encoder
-            cl = self.category_classifier(fds)
-            dl = self.domain_classifier(fcs)
-            rec = self.reconstructor(torch.cat((fds, fcs), 1))
-            return cl, dl, rec, x
-           
-
-        '''Test part'''
-        if state == None:
-            # Testing part
-            x = self.feature_extractor(x)
-            x = self.category_encoder(x)
-            x = self.category_classifier(x)
-            return x
+        if train == True:
+            f = self.feature_extractor(x)
+            fcs = self.category_encoder(f)
+            fds = self.domain_encoder(f)
+            cc = self.category_classifier(fcs)
+            dd = self.domain_classifier(fds)
+            cd = self.category_classifier(fds)
+            dc = self.domain_classifier(fcs)
+            r = self.reconstructor(torch.cat((fds, fcs), 1))
+            return cc, dd, cd, dc, r, f
+        else:
+            f = self.feature_extractor(x)
+            fcs = self.category_encoder(f)
+            cc = self.category_classifier(fcs)
+            return cc
