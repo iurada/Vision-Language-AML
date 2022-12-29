@@ -82,7 +82,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
                 logits = self.model(x, train)
 
-                loss = self.weights[0]*self.criterion_CEL(logits[0], y) # Category encoder + Category classifier
+                loss = self.weights[0]*self.criterion_CEL(logits, y) # Category encoder + Category classifier
 
                 pred = torch.argmax(logits, dim=-1)
                 accuracy += (pred == y).sum().item()
