@@ -33,9 +33,9 @@ def main(opt):
     if opt['experiment'] == 'baseline':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
     elif opt['experiment'] == 'domain_disentangle':
-        experiment, train_loader_1, val_loader_1, train_loader_2, val_loader_2, test_loader = setup_experiment(opt)
+        experiment, train_loader, val_loader, test_loader = setup_experiment(opt)
     elif opt['experiment'] == 'clip_disentangle':
-        experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt)
+        experiment, train_loader, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt)
 
     if not opt['test']: # Skip training if '--test' flag is set
         iteration = 0
