@@ -31,13 +31,12 @@ class EntropyLoss(nn.Module):
     def __init__(self):
         super(EntropyLoss, self).__init__()
 
-    def forward(self, result, input):
-        freq = torch.bincount(input.int())
-        freq = 1/freq[freq.nonzero().squeeze().detach()]
-        logs = torch.log(result)
-        res = torch.FloatTensor([torch.sum(logs[input.eq(_).nonzero().squeeze().detach()]) for _ in input.unique()])
-        b = freq*res
-        return -1.0*b.sum()
+    def forward(self, result):
+        predicted_distribution = torch.softmax(result, dim=1)
+        predicted_distribution += 1e-10
+        predicted_distribution = predicted_distribution / predicted_distribution.sum(dim=1, keepdim=True)
+        neg_entropy_loss = - torch.sum(predicted_distribution)*torch.log(predicted_distribution)
+        return neg_entropy_loss
 
 class CategoryEncoder(nn.Module):
     def __init__(self):
