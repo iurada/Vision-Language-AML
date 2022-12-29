@@ -33,7 +33,6 @@ class EntropyLoss(nn.Module):
     def forward(self, x):
         b = F.log_softmax(x, dim=1)
         b = -1.0 * b.sum()
-        b = b/b.size()[1]
         return b
 
 class CategoryEncoder(nn.Module):
