@@ -1,3 +1,4 @@
+import torch
 import torch.nn.functional as F
 import torch.nn as nn
 from torchvision.models import resnet18
@@ -30,10 +31,13 @@ class EntropyLoss(nn.Module):
     def __init__(self):
         super(EntropyLoss, self).__init__()
 
-    def forward(self, x):
-        b = F.log_softmax(x, dim=1)
-        b = -1.0 * b.sum()
-        return b
+    def forward(self, result, input):
+        freq = torch.bincount(input.int())
+        freq = 1/freq[freq.nonzero().squeeze().detach()]
+        logs = torch.log(result)
+        res = torch.FloatTensor([torch.sum(logs[input.eq(_).nonzero().squeeze().detach()]) for _ in input.unique()])
+        b = freq*res
+        return -1.0*b.sum()
 
 class CategoryEncoder(nn.Module):
     def __init__(self):

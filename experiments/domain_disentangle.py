@@ -61,8 +61,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
         
         loss += self.weights[0]*self.criterion_CEL(logits[0], y) # Category encoder + Category classifier
         loss += self.weights[1]*self.criterion_CEL(logits[1], domain) # Domain encoder + Domain classifier
-        loss += self.weights[2]*self.criterion_EL(logits[2]) # Domain encoder + Category classifier
-        loss += self.weights[3]*self.criterion_EL(logits[3]) # Category encoder + Domain classifier
+        loss += self.weights[2]*self.criterion_EL(logits[2], y) # Domain encoder + Category classifier
+        loss += self.weights[3]*self.criterion_EL(logits[3], domain) # Category encoder + Domain classifier
         loss += self.weights[4]*self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
 
         self.optimizer.zero_grad()
