@@ -1,55 +1,12 @@
 [
 {
-    "image_name": "art_painting/person/pic_502.jpg", 
-    "descriptions": [
-        "detailed, digital, delineated, artificial", 
-        "definite, detailed, sharp", 
-        "intense saturation harmonious saturated vibrant vivid", 
-        "colorful, complementary, rich, warm", 
-        "single color, colorful, rich, uniform", 
-        "multiple instances", 
-        "without text", 
-        "without texture", 
-        "unrealistic"
-    ]
-}, 
-{
-    "image_name": "art_painting/elephant/pic_085.jpg", 
-    "descriptions": [
-        "detailed, intricate", 
-        "precise lines, blurred", 
-        "intense saturation dark", 
-        "grey, deep, faded, ashy", 
-        "multiple color, muted, graduated", 
-        "single instance", 
-        "without text", 
-        "painting strokes", 
-        "realistic"
-    ]
-}, 
-{
-    "image_name": "art_painting/house/pic_331.jpg", 
-    "descriptions": [
-        "detailed, grainy", 
-        "definite, distinct, blurred", 
-        "medium saturation", 
-        "colorful, cool, muted, muddied", 
-        "multiple color, changing, blurred", 
-        "single instance", "without text", 
-        "painting, pencil strokes", 
-        "realistic"
-    ]
-}
-]
-[
-{
     "image_name": "art_painting/horse/pic_147.jpg",
     "descriptions":[
         "mid-level detailed, intricate",
         "few precise lines",
         "low saturation",
         "colorless, white, black, grey, blurred",
-        "without test",
+        "without text",
         "painting strokes",
         "single instance",
         "with low texture",
@@ -99,7 +56,7 @@
     ]
 },
 {
-    "image_name": "art_painting/horse/pic_120.jpg"
+    "image_name": "art_painting/horse/pic_120.jpg",
     "descriptions":[
         "high level details",
         "precise lines",
@@ -121,35 +78,298 @@
         "colorful, white, brown, black",
         "without background",
         "multiple instances",
-        "without test",
+        "without text",
         "without texture",
         "pencil strokes",
         "realistic"
     ]
 },
 {
-    "image_name": "art_painting/horse/pic_014.jpg"
+    "image_name": "art_painting/horse/pic_014.jpg",
     "descriptions":[
-
+        "high level details",
+        "precise lines",
+        "few saturation",
+        "colorful, white, black",
+        "painting strokes",
+        "with no relevant text",
+        "without texture",
+        "realistic",
+        "single instance"
     ]
 },
 {
-    "image_name": "art_painting/horse/pic_057.jpg"
+    "image_name": "art_painting/horse/pic_057.jpg",
     "descriptions":[
-
+        "mid-level detailed, intricate",
+        "few precise lines",
+        "colorful, brown, blue, yellow",
+        "high saturation",
+        "painting strokes",
+        "without text",
+        "with low texture",
+        "with not precise background",
+        "single instance",
+        "unrealistic"
     ]
 },
 {
-    "image_name": "art_painting/horse/pic_036.jpg"
+    "image_name": "art_painting/horse/pic_036.jpg",
     "descriptions":[
-
+        "mid-level detailed, intricate",
+        "few precise lines",
+        "colorful, blue, yellow",
+        "high saturation, blue",
+        "with not precise background",
+        "painting strokes",
+        "with no relevant text",
+        "with texture",
+        "single instance",
+        "unrealistic"
     ]
 },
 {
-    "image_name": "art_painting/horse/pic_043.jpg"
+    "image_name": "art_painting/horse/pic_043.jpg",
     "descriptions":[
-
+        "low-level details, intricate",
+        "without precise lines",
+        "colorful, black, white",
+        "pencil strokes",
+        "without background",
+        "without text",
+        "with texture",
+        "single instance",
+        "unrealistic"
     ]
 },
+{
+    "image_name": "art_painting/house/pic_048.jpg",
+    "descriptions":[
+        "low level details",
+        "with few precise lines",
+        "colorful, green, blue",
+        "boats, sea, grass",
+        "pencil strokes",
+        "without background, sky",
+        "without text",
+        "without texture",
+        "multiple instances",
+        "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_086.jpg",
+    "descriptions":[
+        "with not precise background",
+        "with no precise lines",
+        "low level details",
+        "colorful, yellow, blue, red",
+        "painting strokes",
+        "one instance and a half",
+        "without text",
+        "without texture",
+        "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_291.jpg",
+    "descriptions":[
+        "few precise lines",
+        "mid-level detailed, intricate",
+        "colorful, brown, green",
+        "without background",
+        "without text",
+        "with low texture",
+        "trees, grass",
+        "multiple instances",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_177.jpg",
+    "descriptions":[
+        "mid-level detailed, intricate",
+        "high saturation",
+        "light reflection",
+        "painting strokes",
+        "colofull, white, green",
+        "columns, grass",
+        "single instance",
+        "with low texture",
+        "with no relevant text",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_273.jpg",
+    "descriptions":[
+        "high level details",
+        "lot of precise lines",
+        "single instance",
+        "light reflection",
+        "shadows, U.S.A. flag",
+        "colorful, white, brown, red",
+        "without texture",
+        "with no relevant text",
+        "pencil strokes",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_321.jpg",
+    "descriptions":[
+        "mid-level detailed, intricate",
+        "precise lines",
+        "colorful, orange, yellow, green",
+        "mid-level saturation",
+        "light reflection, shadows",
+        "without text",
+        "without texture",
+        "multiple instances",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_100.jpg",
+    "descriptions":[
+        "mid-level detailed, intricate",
+        "precise lines",
+        "multiple instances",
+        "houses in background",
+        "river, bridge, grass",
+        "colorful, brown, blue, green",
+        "trees, sky",
+        "without text",
+        "without texture",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_276.jpg",
+    "descriptions":[
+        "low level details",
+        "with no precise lines",
+        "single instance",
+        "house in background",
+        "painting strokes",
+        "with texture",
+        "without text",
+        "bush in the first layer",
+        "colorful, blue, green, yellow",
+        "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_003.jpg",
+    "descriptions":[
+        "high level details",
+        "lot of precise lines",
+        "colorful, blue, brown",
+        "single instance",
+        "without text",
+        "without texture",
+        "sky in background",
+        "no light refelction",
+        "pencil strokes",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_028.jpg",
+    "descriptions":[
+        "low level details",
+        "few precise lines",
+        "single instance",
+        "light reflection",
+        "high saturation",
+        "colorful, blue, green, yellow",
+        "without text",
+        "with low texture",
+        "with not precise background",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/house/pic_138.jpg",
+    "descriptions":[
+        "mid-level details",
+        "few precise lines",
+        "high saturation, brown",
+        "painting strokes",
+        "light reflection",
+        "with low texture",
+        "without text",
+        "sky in background",
+        "single instance",
+        "colorful, brown",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_051.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_150.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_023.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_161.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_183.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_186.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_146.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_128.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_043.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_083.jpg",
+    "descriptions":[
+        
+    ]
+},
+{
+    "image_name": "art_painting/elephant/pic_056.jpg",
+    "descriptions":[
+        
+    ]
+}
 ]
 
