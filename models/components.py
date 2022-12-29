@@ -33,7 +33,7 @@ class EntropyLoss(nn.Module):
 
     def forward(self, result):
         predicted_distribution = torch.softmax(result, dim=1)
-        predicted_distribution += 1e-10
+        predicted_distribution = predicted_distribution + 1e-10
         predicted_distribution = predicted_distribution / predicted_distribution.sum(dim=1, keepdim=True)
         neg_log_probs = - torch.log(predicted_distribution)
         elementwise_loss = neg_log_probs*predicted_distribution
