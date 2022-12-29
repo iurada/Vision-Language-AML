@@ -31,14 +31,19 @@ class EntropyLoss(nn.Module):
     def __init__(self):
         super(EntropyLoss, self).__init__()
 
-    def forward(self, result):
-        predicted_distribution = torch.softmax(result, dim=1)
-        predicted_distribution = predicted_distribution + 1e-10
-        predicted_distribution = predicted_distribution / predicted_distribution.sum(dim=1, keepdim=True)
-        neg_log_probs = - torch.log(predicted_distribution)
-        elementwise_loss = neg_log_probs*predicted_distribution
-        negative_entropy = elementwise_loss.sum()
-        return negative_entropy
+    def forward(self, result, expected, cat):
+        if cat == False:
+            exp = expected
+            res = result
+        else:
+            exp = expected[expected.ne(42).nonzero().squeeze()]
+            res = result[expected.ne(42).nonzero().squeeze()]
+        freq = 1/torch.bincount(exp)
+        freq = torch.nan_to_num(freq, nan=0, posinf=0, neginf=0)
+        logs = torch.log_softmax(res, dim=1).sum(dim=0)
+        b = freq*logs
+        b = -1.0*b.sum()
+        return b
 
 class CategoryEncoder(nn.Module):
     def __init__(self):
