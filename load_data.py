@@ -116,21 +116,9 @@ class PACSDatasetDomainDisentangle(Dataset):
         return len(self.examples)
     
     def __getitem__(self, index):
-        img_path = self.examples[index]["path"]
-        y = self.examples[index]["category"]
-        domain = self.examples[index]["domain"]
+        img_path, y, domain = self.examples[index]
         x = self.transform(Image.open(img_path).convert('RGB'))
         return x, y, domain
-
-class DomainDisentangleDict():
-    def __init__(self, path, domain, category=42):
-        self.item = {
-            "path": path,
-            "category": category,
-            "domain": domain
-        }
-    def __getattribute__(self, __name: str):
-        return self.item[__name]
 
 def build_splits_domain_disentangle(opt):
     source_domain = 'art_painting'
@@ -164,13 +152,13 @@ def build_splits_domain_disentangle(opt):
     for category, examples_list in source_examples.items():
         split_idx = round(source_category_ratios[category] * source_val_split_length)
         for i, example in enumerate(examples_list): 
-            train_examples_source.append(DomainDisentangleDict(example, 0, category)) if i>split_idx else val_examples_source.append(DomainDisentangleDict(example, 0, category))
+            train_examples_source.append([example, category, 0]) if i>split_idx else val_examples_source.append([example, category, 0])
     
     for category, examples_list in target_examples.items():
         split_idx = round(target_category_ratios[category] * target_val_split_length)
         for i, example in enumerate(examples_list):
-            test_examples.append(DomainDisentangleDict(example, 1, category))
-            train_examples_target.append(DomainDisentangleDict(example, 1)) if i>split_idx else val_examples_target.append(DomainDisentangleDict(example, 1, category))
+            test_examples.append([example, category, 1])
+            train_examples_target.append([example, 42, 1]) if i>split_idx else val_examples_target.append([example, category, 1])
                 
     train_examples = train_examples_source + train_examples_target
     val_examples = val_examples_source + val_examples_target

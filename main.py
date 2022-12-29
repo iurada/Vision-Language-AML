@@ -33,7 +33,7 @@ def main(opt):
     if opt['experiment'] == 'baseline':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
     elif opt['experiment'] == 'domain_disentangle':
-        experiment, train_loader, val_loader, test_loader = setup_experiment(opt)
+        experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
     elif opt['experiment'] == 'clip_disentangle':
         experiment, train_loader, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt)
 
