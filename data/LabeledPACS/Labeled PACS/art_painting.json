@@ -269,7 +269,7 @@
         "without text",
         "without texture",
         "sky in background",
-        "no light refelction",
+        "no light reflection",
         "pencil strokes",
         "realistic"
     ]
@@ -308,67 +308,287 @@
 {
     "image_name": "art_painting/elephant/pic_051.jpg",
     "descriptions":[
-        
+        "low level details",
+        "few precise lines",
+        "no saturation",
+        "no background",
+        "colorful, blue, white",
+        "pencil strokes",
+        "with low texture",
+        "without text",
+        "blue in background",
+        "single instance",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_150.jpg",
     "descriptions":[
-        
+        "mid-level details",
+        "some precise lines",
+        "no saturation",
+        "no background",
+        "pencil strokes",
+        "single instance",
+        "colorful, blue",
+        "without texture",
+        "without text",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_023.jpg",
     "descriptions":[
-        
+        "mid-level details",
+        "high saturation, blue, yellow",
+        "few precise lines",
+        "painting strokes",
+        "multiple instances",
+        "colorful, blue, green, yellow",
+        "with low texture",
+        "wihtout text",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_161.jpg",
     "descriptions":[
-        
+        "high level details",
+        "precise lines",
+        "low saturation",
+        "colorful, blue, yellow",
+        "with low texture",
+        "without text",
+        "multiple instances",
+        "no background",
+        "painting strokes",
+        "realistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_183.jpg",
     "descriptions":[
-        
+        "low level details",
+        "few precise lines",
+        "no saturation",
+        "colorful, white, blue",
+        "without text",
+        "with texture",
+        "multiple instances",
+        "no background",
+        "pencil strokes",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_186.jpg",
     "descriptions":[
-        
+        "mid-level detailed, intricate",
+        "low saturation, grey",
+        "few precise lines",
+        "colorful, grey, green",
+        "sky in background",
+        "with low texture",
+        "without text",
+        "single instance",
+        "painting strokes",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_146.jpg",
     "descriptions":[
-        
+        "low level details",
+        "high saturation",
+        "light reflection",
+        "colorful, white, grey, blue",
+        "white in background",
+        "single instance",
+        "painting strokes",
+        "with texture",
+        "without text",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_128.jpg",
     "descriptions":[
-        
+        "low level details",
+        "no saturation",
+        "no light reflection",
+        "colorful, yellow, white",
+        "no background",
+        "multiple instances",
+        "pencil strokes",
+        "without texture",
+        "without text",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_043.jpg",
     "descriptions":[
-        
+        "mid-level detailed, intricate",
+        "high saturation, blue",
+        "no background, white",
+        "colorful, white, blue, yellow",
+        "no light reflection",
+        "single instance",
+        "painting strokes",
+        "with low texture",
+        "without text",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_083.jpg",
     "descriptions":[
-        
+        "low level details",
+        "few precise lines",
+        "high saturation, white, orange",
+        "colorful, orange, white, blue",
+        "no background, white",
+        "no light reflection",
+        "single instance",
+        "painting strokes",
+        "with texture",
+        "without text",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/elephant/pic_056.jpg",
     "descriptions":[
-        
+        "mid-level detailed, intricate",
+        "few precise lines",
+        "no saturation",
+        "colorful, yellow, red, blue",
+        "no background, white",
+        "no light reflection",
+        "single instance",
+        "painting strokes",
+        "without texture",
+        "wihtout text",
+        "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_153.jpg",
+    "descriptions":[
+       "low level details",
+       "few precise lines",
+       "no saturation",
+       "colorful, green, yellow, orange",
+       "no background, green",
+       "no light reflection",
+       "single instance",
+       "painting strokes",
+       "without texture",
+       "without text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_221.jpg",
+    "descriptions":[
+       "low level details",
+       "few precise lines",
+       "saturation on yellow",
+       "painting strokes",
+       "no light reflection",
+       "colorful, yellow, brown",
+       "no background",
+       "single instance",
+       "with texture",
+       "without text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_119.jpg",
+    "descriptions":[
+       "low level details",
+       "few precise lines",
+       "colorful, yellow, blue, green",
+       "high saturation",
+       "painting strokes",
+       "light reflection",
+       "single instance",
+       "no background",
+       "with texture",
+       "without text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_157.jpg",
+    "descriptions":[
+       "low level details",
+       "with no precise lines",
+       "colorful, red, yellow",
+       "no saturation",
+       "painting strokes",
+       "pencil strokes",
+       "no light reflection",
+       "single instance",
+       "no background",
+       "with low texture",
+       "without text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_243.jpg",
+    "descriptions":[
+       
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_172.jpg",
+    "descriptions":[
+       
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_120.jpg",
+    "descriptions":[
+       
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_144.jpg",
+    "descriptions":[
+       
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_074.jpg",
+    "descriptions":[
+       
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_063.jpg",
+    "descriptions":[
+       
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_201.jpg",
+    "descriptions":[
+       
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_209.jpg",
+    "descriptions":[
+       
+    ]
+},
+{
+    "image_name": "art_painting/giraffe/pic_214.jpg",
+    "descriptions":[
+       
     ]
 }
 ]
