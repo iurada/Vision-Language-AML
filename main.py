@@ -76,7 +76,7 @@ def main(opt):
             print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
 
         elif opt['experiment'] == 'domain_disentangle':
-            print('Pre-training')
+            print('Training')
             # Train loops 
             best_accuracy = 0
             while iteration < opt['max_iterations']:
@@ -94,6 +94,7 @@ def main(opt):
                         print(f'[VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
                         if val_accuracy > best_accuracy:
                             print("Saving model...")
+                            best_accuracy = val_accuracy
                             experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss)
                         experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
 
@@ -102,6 +103,7 @@ def main(opt):
                         break
 
             # Test
+            print("Testing")
             experiment.load_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth')
             test_accuracy, _ = experiment.validate(test_loader, train=False)
             logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
