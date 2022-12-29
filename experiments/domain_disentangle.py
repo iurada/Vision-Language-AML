@@ -25,10 +25,11 @@ class DomainDisentangleExperiment: # See point 2. of the project
         # Setup loss weights
         self.weights = [1, 1, 1, 1, 1]
 
-    def save_checkpoint(self, path, iteration, total_train_loss):
+    def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
         checkpoint = {}
 
         checkpoint['iteration'] = iteration
+        checkpoint['best_accuracy'] = best_accuracy
         checkpoint['total_train_loss'] = total_train_loss
 
         checkpoint['model'] = self.model.state_dict()
@@ -40,12 +41,13 @@ class DomainDisentangleExperiment: # See point 2. of the project
         checkpoint = torch.load(path)
 
         iteration = checkpoint['iteration']
+        best_accuracy = checkpoint['best_accuracy']
         total_train_loss = checkpoint['total_train_loss']
 
         self.model.load_state_dict(checkpoint['model'])
         self.optimizer.load_state_dict(checkpoint['optimizer'])
 
-        return iteration, total_train_loss
+        return iteration, best_accuracy, total_train_loss
 
     def train_iteration(self, data, train):
         x, y, domain = data
