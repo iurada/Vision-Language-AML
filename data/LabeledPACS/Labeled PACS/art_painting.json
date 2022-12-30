@@ -540,55 +540,515 @@
 {
     "image_name": "art_painting/giraffe/pic_243.jpg",
     "descriptions":[
-       
+       "mid-level detailed, intricate",
+       "with few precise lines",
+       "colorful, white, yellow, orange",
+       "low saturation",
+       "painting strokes",
+       "no light reflection",
+       "single instance",
+       "no background, white",
+       "with low texture",
+       "with no relevant text",
+       "realistic"
     ]
 },
 {
     "image_name": "art_painting/giraffe/pic_172.jpg",
     "descriptions":[
-       
+        "low level details",
+        "with no precise lines",
+        "colorful, yellow, blue, brown",
+        "no saturation",
+        "painting strokes",
+        "no light reflection",
+        "single instance",
+        "no background, blue",
+        "without texture",
+        "without text",
+        "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/giraffe/pic_120.jpg",
     "descriptions":[
-       
+       "mid-level detailed, intricate",
+       "with some precise lines",
+       "colorful, red, yellow",
+       "without background, red",
+       "saturation on yellow and red",
+       "painting strokes",
+       "single instance",
+       "no light reflection",
+       "with texture",
+       "without text",
+       "realistic"
     ]
 },
 {
     "image_name": "art_painting/giraffe/pic_144.jpg",
     "descriptions":[
-       
+       "mid-level detailed, intricate",
+       "with few precise lines",
+       "colorful, red, yellow",
+       "no saturation",
+       "painting strokes",
+       "pencil strokes",
+       "no light reflection",
+       "single instance",
+       "no background",
+       "without texture",
+       "without text",
+       "realistic"
     ]
 },
 {
     "image_name": "art_painting/giraffe/pic_074.jpg",
     "descriptions":[
-       
+       "mid-level detailed, intricate",
+       "with some precise lines",
+       "colorful, blue, yellow, red, black",
+       "no saturation",
+       "no light reflection",
+       "painting strokes",
+       "sky in background",
+       "single instance",
+       "with low texture",
+       "without text",
+       "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/giraffe/pic_063.jpg",
     "descriptions":[
-       
+       "high level details",
+       "precise lines",
+       "colorful, blue, yellow, orange",
+       "low saturation, blue",
+       "no light reflection",
+       "painting strokes",
+       "sky in background",
+       "single instance",
+       "with low texture",
+       "without text",
+       "realistic"
     ]
 },
 {
     "image_name": "art_painting/giraffe/pic_201.jpg",
     "descriptions":[
-       
+       "low level details",
+       "few precise lines",
+       "colorful, green, yellow",
+       "no saturation",
+       "no light reflection",
+       "painting strokes",
+       "no background",
+       "single instance",
+       "with low texture",
+       "wihtout text",
+       "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/giraffe/pic_209.jpg",
     "descriptions":[
-       
+       "low level details",
+       "few precise lines",
+       "colorful, green, yellow, white",
+       "few saturation, green",
+       "no light reflection",
+       "painting strokes",
+       "grass in background",
+       "single instance",
+       "without texture",
+       "without text",
+       "unrealistic"
     ]
 },
 {
     "image_name": "art_painting/giraffe/pic_214.jpg",
     "descriptions":[
-       
+       "mid-level detailed, intricate",
+       "few precise lines",
+       "colorful, blue, yellow, green",
+       "saturation on blue and green",
+       "no light reflection",
+       "painting strokes",
+       "blue and gree in background",
+       "single instance",
+       "with texture",
+       "without text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_414.jpg",
+    "descriptions":[
+       "mid-level detailed, intricate",
+       "few precise lines",
+       "colorful, green, blue, white",
+       "saturation on white, blue",
+       "light reflection",
+       "painting strokes",
+       "sky in background",
+       "multiple instances",
+       "with texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_243.jpg",
+    "descriptions":[
+       "mid-level detailed, intricate",
+       "few precise lines",
+       "colorful, red, blue",
+       "no saturation",
+       "no light reflection",
+       "painting strokes",
+       "room in background",
+       "single instance",
+       "with low texture",
+       "without text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_283.jpg",
+    "descriptions":[
+       "high level details",
+       "precise lines",
+       "colorful, black, yellow",
+       "few saturation, yellow",
+       "no light reflection",
+       "painting strokes",
+       "pencil strokes",
+       "hills and sky in background",
+       "single instance",
+       "with low texture",
+       "wihtout text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_063.jpg",
+    "descriptions":[
+       "high level details",
+       "precise lines",
+       "colorful, red, green, rose",
+       "no saturation",
+       "no light reflection",
+       "painting strokes",
+       "red wall in background",
+       "single instance",
+       "without texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_573.jpg",
+    "descriptions":[
+       "mid-level detailed, intricate",
+       "few precise lines",
+       "colorful, yellow, red, white",
+       "saturation on white",
+       "light reflection",
+       "painting strokes",
+       "no background",
+       "multiple instances",
+       "with texture",
+       "with no relevant text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_527.jpg",
+    "descriptions":[
+       "mid-level detailed, intricate",
+       "few precise lines",
+       "colorful, yellow, white, red",
+       "saturation on white and yellow",
+       "light reflection",
+       "painting strokes",
+       "sky in background",
+       "multiple instances",
+       "with texture",
+       "with no relevant text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_245.jpg",
+    "descriptions":[
+       "mid-level detailed, intricate",
+       "few precise lines",
+       "colorful, yellow, blue, white",
+       "saturation on yellow",
+       "light reflection",
+       "painting strokes",
+       "no background",
+       "multiple instances",
+       "with texture",
+       "without text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_336.jpg",
+    "descriptions":[
+       "high level details",
+       "precise lines",
+       "colorful, green, rose",
+       "no saturation",
+       "light reflection",
+       "painting strokes",
+       "trees in background",
+       "multiple instances",
+       "without texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_539.jpg",
+    "descriptions":[
+       "high level details",
+       "precise lines",
+       "colorful, blue, white, green",
+       "no saturation",
+       "light reflection",
+       "painting strokes",
+       "trees in background",
+       "single instance",
+       "with low texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_361.jpg",
+    "descriptions":[
+        "mid-level detailed, intricate",
+        "few precise lines",
+        "colorful, green, blue, white",
+        "saturation on white, blue",
+        "light reflection",
+        "painting strokes",
+        "sky in background",
+        "multiple instances",
+        "with texture",
+        "without text",
+        "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_469.jpg",
+    "descriptions":[
+       "high level details",
+       "precise lines",
+       "colorful, brown, white, grey",
+       "no saturation",
+       "light reflection",
+       "painting strokes",
+       "no background",
+       "multiple instances",
+       "without texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_228.jpg",
+    "descriptions":[
+       "mid-level detailed, intricate",
+       "few precise lines",
+       "colorful, white, red, blue",
+       "few saturation",
+       "no light reflection",
+       "painting strokes",
+       "flowers in background",
+       "single instance",
+       "with low texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_444.jpg",
+    "descriptions":[
+       "high level details",
+       "precise lines",
+       "colorful, white, red, black",
+       "saturation on grey",
+       "grey background",
+       "no light reflection",
+       "painting strokes",
+       "single instance",
+       "without texture",
+       "with no relevant text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_441.jpg",
+    "descriptions":[
+       "low level details",
+       "few precise lines",
+       "colorful, white, blue, green",
+       "no saturation",
+       "no light reflection",
+       "painting strokes",
+       "multiple instances",
+       "sea and sky in background",
+       "with low texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/person/pic_197.jpg",
+    "descriptions":[
+       "mid-level detailed, intricate",
+       "few precise lines",
+       "colorful, red, yellow, blue",
+       "no saturation",
+       "no light reflection",
+       "painting strokes",
+       "multiple instances",
+       "no background",
+       "without texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/guitar/pic_146.jpg",
+    "descriptions":[
+       "low level details",
+       "few precise lines",
+       "colorful, brown, black",
+       "no saturation",
+       "no light reflection",
+       "painting strokes",
+       "single instance",
+       "with low texture",
+       "with no relevant text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/guitar/pic_055.jpg",
+    "descriptions":[
+       "low level details",
+       "few precise lines",
+       "colorful, red, white, grey",
+       "no saturation",
+       "no light reflection",
+       "pencil strokes",
+       "single instance",
+       "with texture",
+       "without text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/guitar/pic_005.jpg",
+    "descriptions":[
+       "high level details",
+       "precise lines",
+       "colorful, brown, black",
+       "low saturation",
+       "light reflection",
+       "pencil strokes",
+       "painting strokes",
+       "single instance",
+       "with low texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/guitar/pic_124.jpg",
+    "descriptions":[
+       "low level details",
+       "with no precise lines",
+       "colorful, red, yellow",
+       "low saturation",
+       "no light reflection",
+       "painting strokes",
+       "pencil strokes",
+       "single instance",
+       "red and yellow in background",
+       "without texture",
+       "with no relevant text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/guitar/pic_007.jpg",
+    "descriptions":[
+       "low level details",
+       "with no precise lines",
+       "colorful, black, red, blue",
+       "no saturation",
+       "no light reflection",
+       "painting strokes",
+       "single instance",
+       "red, orange, white in background",
+       "without texture",
+       "with no relevant text",
+       "unrealistic"
+    ]
+},
+{
+    "image_name": "art_painting/guitar/pic_119.jpg",
+    "descriptions":[
+       "mid-level detailed, intricate",
+       "with few precise lines",
+       "colorful, orange, black",
+       "no saturation",
+       "no light reflection",
+       "painting strokes",
+       "multiple instances",
+       "no background",
+       "with low texture",
+       "with no relevant text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/guitar/pic_140.jpg",
+    "descriptions":[
+       "mid-level details",
+       "precise lines",
+       "colorful, blue, white, orange",
+       "saturation on white",
+       "no light reflection",
+       "painting strokes",
+       "pencil strokes",
+       "multiple instances",
+       "white in background",
+       "with texture",
+       "without text",
+       "realistic"
+    ]
+},
+{
+    "image_name": "art_painting/guitar/pic_084.jpg",
+    "descriptions":[
+       "low level details",
+       "few precise lines",
+       "colorful, green, red, yellow",
+       "saturation on green and yellow",
+       "light reflection",
+       "painting strokes",
+       "multiple instances",
+       "green in background",
+       "with texture",
+       "with no relevant text",
+       "unrealistic"
     ]
 }
 ]
