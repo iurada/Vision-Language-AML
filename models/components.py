@@ -37,8 +37,8 @@ class EntropyLoss(nn.Module):
             res = result
             freq = 1/torch.bincount(exp, minlength=2)
         else:
-            exp = expected[expected.ne(42).nonzero().squeeze()]
-            res = result[expected.ne(42).nonzero().squeeze()]
+            exp = expected[expected.ne(42).nonzero().squeeze(dim=1)]
+            res = result[expected.ne(42).nonzero().squeeze(dim=1)]
             freq = 1/torch.bincount(exp, minlength=7)
             
         freq = torch.nan_to_num(freq, nan=0, posinf=0, neginf=0)
