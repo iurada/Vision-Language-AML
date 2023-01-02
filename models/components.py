@@ -31,7 +31,8 @@ class EntropyLoss(nn.Module):
     def __init__(self):
         super(EntropyLoss, self).__init__()
 
-    def forward(self, result, expected, cat):
+    def forward(self, result):
+        '''
         if cat == False:
             exp = expected
             res = result
@@ -45,26 +46,25 @@ class EntropyLoss(nn.Module):
         logs = torch.log_softmax(res, dim=1).sum(dim=0)
         b = freq*logs
         b = -1.0*b.sum()
+        '''
+        b = F.softmax(result, dim=1) * F.log_softmax(result, dim=1)
+        b = -1.0 * b.sum()
         return b
 
 class CategoryEncoder(nn.Module):
     def __init__(self):
         super(CategoryEncoder, self).__init__()
         self.category_encoder = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.BatchNorm1d(256),
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
 
-            nn.Linear(256, 128),
-            nn.BatchNorm1d(128),
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
 
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
-            nn.ReLU(),
-
-            nn.Linear(64, 32),
-            nn.BatchNorm1d(32),
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU()
         )
 
@@ -76,20 +76,16 @@ class DomainEncoder(nn.Module):
     def __init__(self):
         super(DomainEncoder, self).__init__()
         self.domain_encoder = nn.Sequential(
-            nn.Linear(512, 256),
-            nn.BatchNorm1d(256),
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
 
-            nn.Linear(256, 128),
-            nn.BatchNorm1d(128),
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
 
-            nn.Linear(128, 64),
-            nn.BatchNorm1d(64),
-            nn.ReLU(),
-
-            nn.Linear(64, 32),
-            nn.BatchNorm1d(32),
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU()
         )
     def forward(self, x):
@@ -99,7 +95,7 @@ class DomainEncoder(nn.Module):
 class CategoryClassifier(nn.Module):
     def __init__(self):
         super(CategoryClassifier, self).__init__()
-        self.category_classifier = nn.Linear(32, 7)
+        self.category_classifier = nn.Linear(512, 7)
     
     def forward(self, x):
         x = self.category_classifier(x)
@@ -108,7 +104,7 @@ class CategoryClassifier(nn.Module):
 class DomainClassifier(nn.Module):
     def __init__(self):
         super(DomainClassifier, self).__init__()
-        self.domain_classifier = nn.Linear(32, 2)
+        self.domain_classifier = nn.Linear(512, 2)
     
     def forward(self, x):
         x = self.domain_classifier(x)
@@ -119,16 +115,16 @@ class Reconstructor(nn.Module):
         super(Reconstructor, self).__init__()
         self.feature_reconstructor = nn.Sequential(
             nn.ReLU(),
-            nn.BatchNorm1d(64),
-            nn.Linear(64, 128),
+            nn.BatchNorm1d(1024),
+            nn.Linear(1024, 512),
 
             nn.ReLU(),
-            nn.BatchNorm1d(128),
-            nn.Linear(128, 256),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, 512),
 
             nn.ReLU(),
-            nn.BatchNorm1d(256),
-            nn.Linear(256, 512),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, 512),
         )
 
     def forward(self, x):

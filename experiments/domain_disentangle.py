@@ -23,7 +23,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.criterion_EL = EntropyLoss()
 
         # Setup loss weights
-        self.weights = [1, 2.591, 0.021, 0.594, 1.123]
+        self.weights = [1, 1, 1]
+        self.alpha = 1.0
 
     def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
         checkpoint = {}
@@ -56,14 +57,28 @@ class DomainDisentangleExperiment: # See point 2. of the project
         domain = domain.to(self.device)
 
         logits = self.model(x, train)
+        # logits[0] CE+CC
+        # logits[1] DE+DC
+        # logits[2] DE+CC
+        # logits[3] CE+DC
+        # logits[4] R
 
-        loss = 0
-        
-        loss += self.weights[0]*self.criterion_CEL(logits[0], y) # Category encoder + Category classifier
-        loss += self.weights[1]*self.criterion_CEL(logits[1], domain) # Domain encoder + Domain classifier
-        loss += self.weights[2]*self.criterion_EL(logits[2], y, True) # Domain encoder + Category classifier
-        loss += self.weights[3]*self.criterion_EL(logits[3], domain, False) # Category encoder + Domain classifier
-        loss += self.weights[4]*self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
+        loss_class_1 = self.criterion_CEL(logits[0], y)
+        loss_class_2 = self.alpha*(-self.criterion_EL(logits[2]))
+        print(loss_class_1)
+        print(loss_class_2)
+        loss_class = loss_class_1 + loss_class_2 # Category classifier
+
+        loss_domain_1 = self.criterion_CEL(logits[1], domain)
+        loss_domain_2 = self.alpha*(-self.criterion_EL(logits[3]))
+        print(loss_domain_1)
+        print(loss_domain_2)
+        loss_domain = loss_domain_1 + loss_domain_2 # Domain classifier
+
+        loss_reconstructor = self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
+        print(loss_reconstructor)
+
+        loss = self.weights[0]*loss_class + self.weights[1]*loss_domain + self.weights[2]*loss_reconstructor
 
         self.optimizer.zero_grad()
         loss.backward()
