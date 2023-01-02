@@ -108,6 +108,13 @@ def main(opt):
             test_accuracy, _ = experiment.validate(test_loader, train=False)
             logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
+    else:
+        # Only testing
+        print("Testing")
+        experiment.load_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth')
+        test_accuracy, _ = experiment.validate(test_loader, train=False)
+        logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
+        print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
             
 
 if __name__ == '__main__':

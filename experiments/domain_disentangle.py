@@ -65,18 +65,13 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         loss_class_1 = self.criterion_CEL(logits[0], y)
         loss_class_2 = self.alpha*(-self.criterion_EL(logits[2]))
-        print(loss_class_1)
-        print(loss_class_2)
         loss_class = loss_class_1 + loss_class_2 # Category classifier
 
         loss_domain_1 = self.criterion_CEL(logits[1], domain)
         loss_domain_2 = self.alpha*(-self.criterion_EL(logits[3]))
-        print(loss_domain_1)
-        print(loss_domain_2)
         loss_domain = loss_domain_1 + loss_domain_2 # Domain classifier
 
         loss_reconstructor = self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
-        print(loss_reconstructor)
 
         loss = self.weights[0]*loss_class + self.weights[1]*loss_domain + self.weights[2]*loss_reconstructor
 
