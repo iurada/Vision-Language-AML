@@ -1,5 +1,7 @@
 import torch
+import torch.nn as nn
 from models.base_model import DomainDisentangleModel
+from models.components import *
 
 class DomainDisentangleExperiment: # See point 2. of the project
     
@@ -16,8 +18,13 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         # Setup optimization procedure
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
-        self.criterion_1 = torch.nn.CrossEntropyLoss()
-        self.criterion_2 = torch.nn.MSELoss()
+        self.criterion_CEL = torch.nn.CrossEntropyLoss(ignore_index=42)
+        self.criterion_MSEL = torch.nn.MSELoss()
+        self.criterion_EL = EntropyLoss()
+
+        # Setup loss weights
+        self.weights = [1, 1, 1]
+        self.alpha = 0.033
 
     def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
         checkpoint = {}
@@ -42,43 +49,38 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         return iteration, best_accuracy, total_train_loss
 
-    def train_iteration(self, data, label, mode=None):
+    def train_iteration(self, data, train):
         x, y, domain = data
         x = x.to(self.device)
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        results = self.model(x, label, mode)
-        if label == 0:
-            # Training with source
-            loss_1 = self.criterion_1(results[2], y)
-            loss_2 = self.criterion_1(results[3], domain)
-            loss_3 = -self.criterion_1(results[4], y)
-            loss_4 = -self.criterion_1(results[5], domain)
-            loss_5 = self.criterion_2(results[0], results[1])
-            self.optimizer.zero_grad()
-            loss_1.backward(retain_graph=True)
-            loss_2.backward(retain_graph=True)
-            loss_3.backward(retain_graph=True)
-            loss_4.backward(retain_graph=True)
-            loss_5.backward(retain_graph=True)
-            self.optimizer.step()
-            loss = loss_1 + loss_2 + loss_3 + loss_4 + loss_5
-            return loss.item()
-        else:
-            # Training with target
-            loss_1 = self.criterion_1(results[2], domain) 
-            loss_2 = -self.criterion_1(results[3], domain)
-            loss_3 = self.criterion_2(results[0], results[1])
-            self.optimizer.zero_grad()
-            loss_1.backward(retain_graph=True)
-            loss_2.backward(retain_graph=True)
-            loss_3.backward(retain_graph=True)
-            self.optimizer.step()
-            loss = loss_1 + loss_2 + loss_3
-            return loss.item()
+        logits = self.model(x, train)
+        # logits[0] CE+CC
+        # logits[1] DE+DC
+        # logits[2] DE+CC
+        # logits[3] CE+DC
+        # logits[4] R
 
-    def validate(self, loader, label):
+        loss_class_1 = self.criterion_CEL(logits[0], y)
+        loss_class_2 = self.alpha*(-self.criterion_EL(logits[2]))
+        loss_class = loss_class_1 + loss_class_2 # Category classifier
+
+        loss_domain_1 = self.criterion_CEL(logits[1], domain)
+        loss_domain_2 = self.alpha*(-self.criterion_EL(logits[3]))
+        loss_domain = loss_domain_1 + loss_domain_2 # Domain classifier
+
+        loss_reconstructor = self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
+
+        loss = self.weights[0]*loss_class + self.weights[1]*loss_domain + self.weights[2]*loss_reconstructor
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        return loss.item()
+
+    def validate(self, loader, train):
         self.model.eval()
         accuracy = 0
         count = 0
@@ -89,27 +91,13 @@ class DomainDisentangleExperiment: # See point 2. of the project
                 y = y.to(self.device)
                 domain = domain.to(self.device)
 
-                if label == 0:
-                    # Validation with source                
-                    _, _, category_class, _, _, _ = self.model(x, label)
-                    loss += self.criterion_1(category_class, y)
-                    pred = torch.argmax(category_class, dim=-1)
-                    accuracy += (pred == y).sum().item()
-                    count += x.size(0)
-                elif label == 1:
-                    # Validation with target
-                    _, _, domain_class, _ = self.model(x, label)
-                    loss += self.criterion_1(domain_class, domain)
-                    pred = torch.argmax(domain_class, dim=-1)
-                    accuracy += (pred == domain).sum().item()
-                    count += x.size(0)
-                else:
-                    # Testing
-                    result = self.model(x, label)
-                    loss += self.criterion_1(result, y)
-                    pred = torch.argmax(result, dim=-1)
-                    accuracy += (pred==y).sum().item()
-                    count += x.size(0)
+                logits = self.model(x, train)
+
+                loss = self.weights[0]*self.criterion_CEL(logits, y) # Category encoder + Category classifier
+
+                pred = torch.argmax(logits, dim=-1)
+                accuracy += (pred == y).sum().item()
+                count += x.size(0)
 
         mean_accuracy = accuracy / count
         mean_loss = loss / count

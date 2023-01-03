@@ -1,0 +1,50 @@
+[
+{
+    "image_name": "art_painting/person/pic_502.jpg", 
+    "descriptions": [
+        "detailed, digital, delineated, artificial", 
+        "definite, detailed, sharp", 
+        "intense saturation harmonious saturated vibrant vivid", 
+        "colorful, complementary, rich, warm", 
+        "single color, colorful, rich, uniform", 
+        "multiple instances", 
+        "without text", 
+        "without texture", 
+        "unrealistic"
+    ]
+}, 
+{
+    "image_name": "art_painting/elephant/pic_085.jpg", 
+    "descriptions": [
+        "detailed, intricate", 
+        "precise lines, blurred", 
+        "intense saturation dark", 
+        "grey, deep, faded, ashy", 
+        "multiple color, muted, graduated", 
+        "single instance", 
+        "without text", 
+        "painting strokes", 
+        "realistic"
+    ]
+}, 
+{
+    "image_name": "art_painting/house/pic_331.jpg", 
+    "descriptions": [
+        "detailed, grainy", 
+        "definite, distinct, blurred", 
+        "medium saturation", 
+        "colorful, cool, muted, muddied", 
+        "multiple color, changing, blurred", 
+        "single instance", "without text", 
+        "painting, pencil strokes", 
+        "realistic"
+    ]
+}
+]
+
+[
+{
+    
+}
+]
+

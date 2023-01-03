@@ -1,0 +1,132 @@
+import torch
+import torch.nn.functional as F
+import torch.nn as nn
+from torchvision.models import resnet18
+
+def set_requires_grad(model, requires_grad=True):
+    for param in model.parameters():
+        param.requires_grad = requires_grad
+
+class FeatureExtractor(nn.Module):
+    def __init__(self):
+        super(FeatureExtractor, self).__init__()
+        self.resnet18 = resnet18(pretrained=True)
+    
+    def forward(self, x):
+        x = self.resnet18.conv1(x)
+        x = self.resnet18.bn1(x)
+        x = self.resnet18.relu(x)
+        x = self.resnet18.maxpool(x)
+        x = self.resnet18.layer1(x)
+        x = self.resnet18.layer2(x)
+        x = self.resnet18.layer3(x)
+        x = self.resnet18.layer4(x)
+        x = self.resnet18.avgpool(x)
+        x = x.squeeze()
+        if len(x.size()) < 2:
+            x = x.unsqueeze(0)
+        return x
+
+class EntropyLoss(nn.Module):
+    def __init__(self):
+        super(EntropyLoss, self).__init__()
+
+    def forward(self, result):
+        '''
+        if cat == False:
+            exp = expected
+            res = result
+            freq = 1/torch.bincount(exp, minlength=2)
+        else:
+            exp = expected[expected.ne(42).nonzero().squeeze(dim=1)]
+            res = result[expected.ne(42).nonzero().squeeze(dim=1)]
+            freq = 1/torch.bincount(exp, minlength=7)
+            
+        freq = torch.nan_to_num(freq, nan=0, posinf=0, neginf=0)
+        logs = torch.log_softmax(res, dim=1).sum(dim=0)
+        b = freq*logs
+        b = -1.0*b.sum()
+        '''
+        b = F.softmax(result, dim=1) * F.log_softmax(result, dim=1)
+        b = -1.0 * b.sum()
+        return b
+
+class CategoryEncoder(nn.Module):
+    def __init__(self):
+        super(CategoryEncoder, self).__init__()
+        self.category_encoder = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU()
+        )
+
+    def forward(self, x):
+        x = self.category_encoder(x)
+        return x
+
+class DomainEncoder(nn.Module):
+    def __init__(self):
+        super(DomainEncoder, self).__init__()
+        self.domain_encoder = nn.Sequential(
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU()
+        )
+    def forward(self, x):
+        x = self.domain_encoder(x)
+        return x
+
+class CategoryClassifier(nn.Module):
+    def __init__(self):
+        super(CategoryClassifier, self).__init__()
+        self.category_classifier = nn.Linear(512, 7)
+    
+    def forward(self, x):
+        x = self.category_classifier(x)
+        return x
+
+class DomainClassifier(nn.Module):
+    def __init__(self):
+        super(DomainClassifier, self).__init__()
+        self.domain_classifier = nn.Linear(512, 2)
+    
+    def forward(self, x):
+        x = self.domain_classifier(x)
+        return x
+
+class Reconstructor(nn.Module):
+    def __init__(self):
+        super(Reconstructor, self).__init__()
+        self.feature_reconstructor = nn.Sequential(
+            nn.ReLU(),
+            nn.BatchNorm1d(1024),
+            nn.Linear(1024, 512),
+
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, 512),
+
+            nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Linear(512, 512),
+        )
+
+    def forward(self, x):
+        x = self.feature_reconstructor(x)
+        return x
