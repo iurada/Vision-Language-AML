@@ -94,7 +94,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
                 y = y.to(self.device)
                 domain = domain.to(self.device)
 
-                logits = self.model(x, train)
+                logits = self.model(x, train, False)
 
                 loss = self.weights[0]*self.criterion_CEL(logits, y) # Category encoder + Category classifier
 
