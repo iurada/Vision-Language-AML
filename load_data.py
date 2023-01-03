@@ -163,12 +163,12 @@ def build_splits_domain_disentangle(opt):
 
     if opt['dom_gen'] == False:
         source_examples = read_lines(opt['data_path'], source_domain)
+        target_examples = read_lines(opt['data_path'], target_domain)
     else:
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
-        source_examples, image_domain = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
-
-    target_examples = read_lines(opt['data_path'], target_domain)
-
+        source_examples, image_domain_s = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
+        target_examples, image_domain_t = read_lines_DG(opt['data_path'], [target_domain])
+    
     # Compute ratios of examples for each category
     source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
     source_total_examples = sum(source_category_ratios.values())
@@ -197,7 +197,7 @@ def build_splits_domain_disentangle(opt):
             if opt['dom_gen'] == False: 
                 train_examples_source.append([example, category, 0]) if i>split_idx else val_examples_source.append([example, category, 0])
             else:
-                train_examples_source.append([example, category, image_domain[example]]) if i>split_idx else val_examples_source.append([example, category, image_domain[example]])
+                train_examples_source.append([example, category, image_domain_s[example]]) if i>split_idx else val_examples_source.append([example, category, image_domain_s[example]])
     
     for category, examples_list in target_examples.items():
         split_idx = round(target_category_ratios[category] * target_val_split_length)
@@ -206,8 +206,8 @@ def build_splits_domain_disentangle(opt):
                 test_examples.append([example, category, 1])
                 train_examples_target.append([example, 42, 1]) if i>split_idx else val_examples_target.append([example, category, 1])
             else:
-                test_examples.append([example, category, image_domain[example]])
-                train_examples_target.append([example, 42, image_domain[example]]) if i>split_idx else val_examples_target.append([example, category, image_domain[example]])
+                test_examples.append([example, category, image_domain_t[example]])
+                train_examples_target.append([example, 42, image_domain_t[example]]) if i>split_idx else val_examples_target.append([example, category, image_domain_t[example]])
                 
     train_examples = train_examples_source + train_examples_target
     val_examples = val_examples_source + val_examples_target
