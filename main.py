@@ -18,38 +18,21 @@ def setup_experiment(opt):
         experiment = DomainDisentangleExperiment(opt)
         train_loader, validation_loader, test_loader = build_splits_domain_disentangle(opt)
         return experiment, train_loader, validation_loader, test_loader
-
     elif opt['experiment'] == 'clip_disentangle':
         experiment = CLIPDisentangleExperiment(opt)
         train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt)
-        return experiment, train_loader, validation_loader, test_loader
-    elif opt['experiment'] == 'baseline_DG':
-        experiment = BaselineExperiment(opt)
-        train_loader, validation_loader, test_loader = build_splits_baseline(opt, mode='DG')
-        return experiment, train_loader, validation_loader, test_loader
-    elif opt['experiment'] == 'domain_disentangle_DG':
-        experiment = DomainDisentangleExperiment(opt)
-        train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = build_splits_domain_disentangle(opt, mode='DG')
-        return experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader
-    elif opt['experiment'] == 'clip_disentangle_DG':
-        experiment = CLIPDisentangleExperiment(opt)
-        train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt, mode='DG')
         return experiment, train_loader, validation_loader, test_loader
     else:
         raise ValueError('Experiment not yet supported.')
     
 
 def main(opt):
-    if opt['experiment'] == 'baseline' or opt['experiment'] == 'baseline_DG':
-        experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
-    elif opt['experiment'] == 'domain_disentangle' or opt['experiment'] == 'domain_disentangle_DG':
-        experiment, train_loader_source, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt)
-    elif opt['experiment'] == 'clip_disentangle' or opt['experiment'] == 'clip_disentangle_DG':
+    if opt['experiment'] == 'baseline':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
     elif opt['experiment'] == 'domain_disentangle':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
     elif opt['experiment'] == 'clip_disentangle':
-        experiment, train_loader, train_loader_target, validation_loader_source, validation_loader_target, test_loader = setup_experiment(opt)
+        experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
 
     if not opt['test']: # Skip training if '--test' flag is set
         iteration = 0

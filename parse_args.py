@@ -6,7 +6,7 @@ def parse_arguments():
     
     print(parser)
 
-    parser.add_argument('--experiment', type=str, default='baseline', choices=['baseline', 'domain_disentangle', 'clip_disentangle', 'baseline_DG', 'domain_disentangle_DG', 'clip_disentangle_DG'])
+    parser.add_argument('--experiment', type=str, default='baseline', choices=['baseline', 'domain_disentangle', 'clip_disentangle'])
 
     parser.add_argument('--target_domain', type=str, default='cartoon', choices=['art_painting', 'cartoon', 'sketch', 'photo'])
     parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate.')
@@ -15,6 +15,7 @@ def parse_arguments():
     parser.add_argument('--num_workers', type=int, default=1)
     parser.add_argument('--print_every', type=int, default=50)
     parser.add_argument('--validate_every', type=int, default=100)
+    parser.add_argument('--domain_generalization', type=bool, default=False)
 
     parser.add_argument('--output_path', type=str, default='.', help='Where to create the output directory containing logs and weights.')
     parser.add_argument('--data_path', type=str, default='data/PACS', help='Locate the PACS dataset on disk.')

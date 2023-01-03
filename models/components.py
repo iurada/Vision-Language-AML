@@ -32,21 +32,6 @@ class EntropyLoss(nn.Module):
         super(EntropyLoss, self).__init__()
 
     def forward(self, result):
-        '''
-        if cat == False:
-            exp = expected
-            res = result
-            freq = 1/torch.bincount(exp, minlength=2)
-        else:
-            exp = expected[expected.ne(42).nonzero().squeeze(dim=1)]
-            res = result[expected.ne(42).nonzero().squeeze(dim=1)]
-            freq = 1/torch.bincount(exp, minlength=7)
-            
-        freq = torch.nan_to_num(freq, nan=0, posinf=0, neginf=0)
-        logs = torch.log_softmax(res, dim=1).sum(dim=0)
-        b = freq*logs
-        b = -1.0*b.sum()
-        '''
         b = F.softmax(result, dim=1) * F.log_softmax(result, dim=1)
         b = -1.0 * b.sum()
         return b

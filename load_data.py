@@ -58,11 +58,38 @@ def read_lines(data_path, domain_name):
 
     return examples
 
+def read_lines_DG(data_path, domains):
+    examples = {}
+    
+    for domain in domains:
+        with open(f'./Vision-Language-AML/{data_path}/{domain}.txt') as f:
+            lines = f.readlines()
+
+        for line in lines: 
+            main_folder = './Vision-Language-AML/'
+            local_folder = '/kfold/'
+            line = line.strip().split()[0].split('/')
+            category_name = line[3]
+            category_idx = CATEGORIES[category_name]
+            image_name = line[4]
+            image_path = f'{main_folder}{data_path}{local_folder}{domain}/{category_name}/{image_name}'
+            if category_idx not in examples.keys():
+                examples[category_idx] = [image_path]
+            else:
+                examples[category_idx].append(image_path)
+
+    return examples
+
 def build_splits_baseline(opt):
     source_domain = 'art_painting'
     target_domain = opt['target_domain']
 
-    source_examples = read_lines(opt['data_path'], source_domain)
+    if opt['domain_generalization'] == False:
+        source_examples = read_lines(opt['data_path'], source_domain)
+    else:
+        choices = ['art_painting', 'cartoon', 'sketch', 'photo']
+        source_examples = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
+
     target_examples = read_lines(opt['data_path'], target_domain)
 
     # Compute ratios of examples for each category
@@ -128,18 +155,16 @@ class PACSDatasetDomainDisentangle(Dataset):
         x = self.transform(Image.open(img_path).convert('RGB'))
         return x, y, domain
 
-def build_splits_domain_disentangle(opt, mode=None):
-
-    if mode == None:
-        source_domain = 'art_painting'
-        target_domain = opt['target_domain']
-        source_examples = read_lines(opt['data_path'], source_domain)
-        target_examples = read_lines(opt['data_path'], target_domain)
 def build_splits_domain_disentangle(opt):
     source_domain = 'art_painting'
     target_domain = opt['target_domain']
 
-    source_examples = read_lines(opt['data_path'], source_domain)
+    if opt['domain_generalization'] == False:
+        source_examples = read_lines(opt['data_path'], source_domain)
+    else:
+        choices = ['art_painting', 'cartoon', 'sketch', 'photo']
+        source_examples = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
+
     target_examples = read_lines(opt['data_path'], target_domain)
 
     # Compute ratios of examples for each category
