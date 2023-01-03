@@ -77,7 +77,7 @@ def main(opt):
             # Define scheduler
             # A scheduler dynamically changes learning rate
             # The most common schedule is the step(-down), which multiplies learning rate by gamma every STEP_SIZE epochs
-            scheduler = torch.optim.lr_scheduler.StepLR(experiment.optimizer, step_size=50, gamma=0.5)
+            scheduler = torch.optim.lr_scheduler.StepLR(experiment.optimizer, step_size=4, gamma=0.5)
             # Train loops 
             best_accuracy = 0
             while iteration < opt['max_iterations']:

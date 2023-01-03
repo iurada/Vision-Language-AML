@@ -23,7 +23,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.criterion_EL = EntropyLoss()
 
         # Setup loss weights
-        self.weights = [10, 5, 0.5] # 2 2 1
+        self.weights = [3, 1.5, 0.5] # 2 2 1
         self.alpha_cat = 0.05
         self.alpha_dom = 0.003
 
