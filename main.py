@@ -74,6 +74,10 @@ def main(opt):
 
         elif opt['experiment'] == 'domain_disentangle':
             print('Training')
+            # Define scheduler
+            # A scheduler dynamically changes learning rate
+            # The most common schedule is the step(-down), which multiplies learning rate by gamma every STEP_SIZE epochs
+            scheduler = torch.optim.lr_scheduler.StepLR(experiment.optimizer, step_size=50, gamma=0.5)
             # Train loops 
             best_accuracy = 0
             while iteration < opt['max_iterations']:
@@ -98,6 +102,8 @@ def main(opt):
                     iteration += 1
                     if iteration > opt['max_iterations']:
                         break
+
+                scheduler.step()
 
             # Test
             print("Testing")

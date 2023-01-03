@@ -18,13 +18,14 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         # Setup optimization procedure
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
-        self.criterion_CEL = torch.nn.CrossEntropyLoss(ignore_index=42)
+        self.criterion_CEL = torch.nn.CrossEntropyLoss(ignore_index=42)     #ingnore index 42 that is put to discriminate the target
         self.criterion_MSEL = torch.nn.MSELoss()
         self.criterion_EL = EntropyLoss()
 
         # Setup loss weights
-        self.weights = [1, 1, 1]
-        self.alpha = 0.033
+        self.weights = [10, 5, 0.5] # 2 2 1
+        self.alpha_cat = 0.05
+        self.alpha_dom = 0.003
 
         # Set Domain Generalization
         self.domain_generalization = opt['dom_gen']
@@ -52,7 +53,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         return iteration, best_accuracy, total_train_loss
 
-    def train_iteration(self, data, train):
+    def train_iteration(self, data, train): #train flag se false per validation/test
         x, y, domain = data
         x = x.to(self.device)
         y = y.to(self.device)
@@ -65,13 +66,13 @@ class DomainDisentangleExperiment: # See point 2. of the project
         # logits[3] CE+DC
         # logits[4] R
 
-        loss_class_1 = self.criterion_CEL(logits[0], y)
-        loss_class_2 = self.alpha*(-self.criterion_EL(logits[2]))
-        loss_class = loss_class_1 + loss_class_2 # Category classifier
+        loss_class_1 = self.criterion_CEL(logits[0], y) # CEL of the categories
+        loss_class_2 = self.alpha_cat*(-self.criterion_EL(logits[3]))
+        loss_class = loss_class_1 + loss_class_2 # Category encoder
 
-        loss_domain_1 = self.criterion_CEL(logits[1], domain)
-        loss_domain_2 = self.alpha*(-self.criterion_EL(logits[3]))
-        loss_domain = loss_domain_1 + loss_domain_2 # Domain classifier
+        loss_domain_1 = self.criterion_CEL(logits[1], domain) # CEL of the domains
+        loss_domain_2 = self.alpha_dom*(-self.criterion_EL(logits[2]))
+        loss_domain = loss_domain_1 + loss_domain_2 # Domain encoder
 
         loss_reconstructor = self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
 

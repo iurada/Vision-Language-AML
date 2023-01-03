@@ -74,7 +74,7 @@ def read_lines_DG(data_path, domains):
             category_idx = CATEGORIES[category_name]
             image_name = line[4]
             image_path = f'{main_folder}{data_path}{local_folder}{domain}/{category_name}/{image_name}'
-            image_domain[image_path] = DOMAINS[domain]
+            image_domain[image_path] = DOMAINS[domain]  
             if category_idx not in examples.keys():
                 examples[category_idx] = [image_path]
             else:
@@ -164,7 +164,7 @@ def build_splits_domain_disentangle(opt):
     if opt['dom_gen'] == False:
         source_examples = read_lines(opt['data_path'], source_domain)
         target_examples = read_lines(opt['data_path'], target_domain)
-    else:
+    else:   #se in dom gen nel source leggo tutto tranne target
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
         source_examples, image_domain_s = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
         target_examples, image_domain_t = read_lines_DG(opt['data_path'], [target_domain])
@@ -190,7 +190,7 @@ def build_splits_domain_disentangle(opt):
     train_examples_target = []
     val_examples_target = []
     test_examples = []
-
+    
     for category, examples_list in source_examples.items():
         split_idx = round(source_category_ratios[category] * source_val_split_length)
         for i, example in enumerate(examples_list):
@@ -202,10 +202,10 @@ def build_splits_domain_disentangle(opt):
     for category, examples_list in target_examples.items():
         split_idx = round(target_category_ratios[category] * target_val_split_length)
         for i, example in enumerate(examples_list):
-            if opt['dom_gen'] == False:
+            if opt['dom_gen'] == False: 
                 test_examples.append([example, category, 1])
                 train_examples_target.append([example, 42, 1]) if i>split_idx else val_examples_target.append([example, category, 1])
-            else:
+            else:   #se sono in dom gen passo anche dominio
                 test_examples.append([example, category, image_domain_t[example]])
                 train_examples_target.append([example, 42, image_domain_t[example]]) if i>split_idx else val_examples_target.append([example, category, image_domain_t[example]])
                 
