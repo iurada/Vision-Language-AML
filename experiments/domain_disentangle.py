@@ -27,7 +27,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.alpha = 0.033
 
         # Set Domain Generalization
-        self.domain_generalization = opt['--dom_gen']
+        self.domain_generalization = opt['dom_gen']
 
     def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
         checkpoint = {}
