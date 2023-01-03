@@ -84,7 +84,7 @@ def build_splits_baseline(opt):
     source_domain = 'art_painting'
     target_domain = opt['target_domain']
 
-    if opt['domain_generalization'] == False:
+    if opt['dom_gen'] == False:
         source_examples = read_lines(opt['data_path'], source_domain)
     else:
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
@@ -159,7 +159,7 @@ def build_splits_domain_disentangle(opt):
     source_domain = 'art_painting'
     target_domain = opt['target_domain']
 
-    if opt['domain_generalization'] == False:
+    if opt['dom_gen'] == False:
         source_examples = read_lines(opt['data_path'], source_domain)
     else:
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
