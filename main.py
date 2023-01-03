@@ -81,6 +81,7 @@ def main(opt):
             # Train loops 
             best_accuracy = 0
             while iteration < opt['max_iterations']:
+                logging.info(f'Learning rate {scheduler.get_lr()} at iteration {iteration}')
                 for data in train_loader:
 
                     total_train_loss += experiment.train_iteration(data, train=True)
