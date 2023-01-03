@@ -26,6 +26,9 @@ class DomainDisentangleExperiment: # See point 2. of the project
         self.weights = [1, 1, 1]
         self.alpha = 0.033
 
+        # Set Domain Generalization
+        self.domain_generalization = opt['--dom_gen']
+
     def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
         checkpoint = {}
 
@@ -55,7 +58,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        logits = self.model(x, train)
+        logits = self.model(x, train, self.domain_generalization)
         # logits[0] CE+CC
         # logits[1] DE+DC
         # logits[2] DE+CC

@@ -89,10 +89,14 @@ class CategoryClassifier(nn.Module):
 class DomainClassifier(nn.Module):
     def __init__(self):
         super(DomainClassifier, self).__init__()
-        self.domain_classifier = nn.Linear(512, 2)
+        self.domain_classifier_standard = nn.Linear(512, 2)
+        self.domain_classifier_DG = nn.Linear(512, 4)
     
-    def forward(self, x):
-        x = self.domain_classifier(x)
+    def forward(self, x, domain_generalization):
+        if domain_generalization == False:
+            x = self.domain_classifier_standard(x)
+        else:
+            x = self.domain_classifier_DG(x)
         return x
 
 class Reconstructor(nn.Module):

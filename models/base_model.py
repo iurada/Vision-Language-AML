@@ -38,16 +38,16 @@ class DomainDisentangleModel(nn.Module):
         self.domain_classifier = DomainClassifier()
         self.reconstructor = Reconstructor()
 
-    def forward(self, x, train):
+    def forward(self, x, train, domain_generalization):
 
         if train == True:
             f = self.feature_extractor(x)
             fcs = self.category_encoder(f)
             fds = self.domain_encoder(f)
             cc = self.category_classifier(fcs)
-            dd = self.domain_classifier(fds)
+            dd = self.domain_classifier(fds, domain_generalization)
             cd = self.category_classifier(fds)
-            dc = self.domain_classifier(fcs)
+            dc = self.domain_classifier(fcs, domain_generalization)
             r = self.reconstructor(torch.cat((fds, fcs), 1))
             return cc, dd, cd, dc, r, f
         else:
