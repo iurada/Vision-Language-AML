@@ -30,9 +30,10 @@ At this point you should be able to run and edit the base code provided.
 | `parse_args.py` | contains the function responsible for parsing each command line argument. |
 | `load_data.py` | contains the code to load data, build splits and dataloaders. |
 | `models/base_model.py` | contains the architectures used in the project. |
-| `experiments/baseline.py` | contains the code to reproduce the baseline experiment (see point 1. of the project) |
-| `experiments/domain_disentangle.py` | contains the skeleton code to implement the domain disentanglement experiment (see point 2. of the project) |
-| `experiments/clip_disentangle.py` | contains the skeleton code to implement the disentanglement experiment using CLIP (see point 4. of the project) |
+| `models/components.py` | contains the main elements used in the architectures. |
+| `experiments/baseline.py` | contains the code to reproduce the baseline experiment (see point 1. of the project). |
+| `experiments/domain_disentangle.py` | contains the skeleton code to implement the domain disentanglement experiment (see point 2. of the project). |
+| `experiments/clip_disentangle.py` | contains the skeleton code to implement the disentanglement experiment using CLIP (see point 4. of the project). |
 
 ## Base Command Line Arguments
 | Argument &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;  | Description |
