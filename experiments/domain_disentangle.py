@@ -92,7 +92,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         loss_class_1 = self.criterion_CEL(logits[0], y) # CEL of the categories
         loss_class_2 = self.alpha_cat*(-self.criterion_EL(logits[3]))
-        loss_class = self.weights[0] * (loss_class_1 + loss_class_2) # Category encoder
+        loss_class = loss_class_1 + loss_class_2 # Category encoder
+        loss_class = self.weights[0] * loss_class 
 
         self.optimisers_step(
             ['Feature_extractor', 'Category_encoder', 'Category_classifier', 'Domain_classifier'],
@@ -101,14 +102,16 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         loss_domain_1 = self.criterion_CEL(logits[1], domain) # CEL of the domains
         loss_domain_2 = self.alpha_dom*(-self.criterion_EL(logits[2]))
-        loss_domain = self.weights[1] * (loss_domain_1 + loss_domain_2) # Domain encoder
+        loss_domain = loss_domain_1 + loss_domain_2 # Domain encoder
+        loss_domain = self.weights[1] * loss_domain
 
         self.optimisers_step(
             ['Feature_extractor', 'Domain_encoder', 'Domain_classifier', 'Category_classifier'],
             loss_domain
         )
 
-        loss_reconstructor = self.weights[2] * self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
+        loss_reconstructor = self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
+        loss_reconstructor = self.weights[2] * loss_reconstructor
 
         self.optimisers_step(
             ['Feature_extractor', 'Category_encoder', 'Domain_encoder', 'Reconstructor'],
