@@ -31,7 +31,7 @@ class CLIPDisentangleExperiment:
         self.criterion_EL = EntropyLoss()
 
         # Setup loss weights
-        self.weights = [3, 1.5, 0.5, 1] # 2 2 1
+        self.weights = [3, 1.5, 0.5, 1] 
         self.alpha_cat = 0.05
         self.alpha_dom = 0.003
 
