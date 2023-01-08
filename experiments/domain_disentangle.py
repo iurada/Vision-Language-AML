@@ -17,14 +17,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
             param.requires_grad = True
 
         # Setup optimization procedure
-        self.optimisers = {
-            'Feature_extractor': torch.optim.Adam(self.model.feature_extractor.parameters(), lr=opt['lr']),
-            'Category_encoder': torch.optim.Adam(self.model.category_encoder.parameters(), lr=opt['lr']),
-            'Domain_encoder': torch.optim.Adam(self.model.domain_encoder.parameters(), lr=opt['lr']),
-            'Category_classifier': torch.optim.Adam(self.model.category_classifier.parameters(), lr=opt['lr']),
-            'Domain_classifier': torch.optim.Adam(self.model.domain_classifier.parameters(), lr=opt['lr']),
-            'Reconstructor': torch.optim.Adam(self.model.reconstructor.parameters(), lr=opt['lr']),
-        }
+        self.optimizer = torch.optim.Adam(self.model.feature_extractor.parameters(), lr=opt['lr'])
+
         self.criterion_CEL = torch.nn.CrossEntropyLoss(ignore_index=42)     #ingnore index 42 that is put to discriminate the target
         self.criterion_MSEL = torch.nn.MSELoss()
         self.criterion_EL = EntropyLoss()
@@ -36,12 +30,6 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         # Set Domain Generalization
         self.domain_generalization = opt['dom_gen']
-
-    def optimisers_zero(self, optimisers: list):
-        for o in optimisers: self.optimisers[o].zero_grad()
-    
-    def optimisers_step(self, optimisers: list):
-        for o in optimisers: self.optimisers[o].step()
     
 
     def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
@@ -51,14 +39,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         checkpoint['best_accuracy'] = best_accuracy
         checkpoint['total_train_loss'] = total_train_loss
         checkpoint['model'] = self.model.state_dict()
-        checkpoint['optimizer'] = [
-            self.optimizers['Feature_extractor'].state_dict(),
-            self.optimizers['Category_encoder'].state_dict(),
-            self.optimizers['Domain_encoder'].state_dict(),
-            self.optimizers['Category_classifier'].state_dict(),
-            self.optimizers['Domain_classifier'].state_dict(),
-            self.optimizers['Reconstructor'].state_dict(),
-        ]
+        checkpoint['optimizer'] = self.optimizer.state_dict()
 
         torch.save(checkpoint, path)
 
@@ -70,12 +51,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
         total_train_loss = checkpoint['total_train_loss']
 
         self.model.load_state_dict(checkpoint['model'])
-        self.optimizers['Feature_extractor'].load_state_dict(checkpoint['optimizer'][0])
-        self.optimizers['Category_encoder'].load_state_dict(checkpoint['optimizer'][1])
-        self.optimizers['Domain_encoder'].load_state_dict(checkpoint['optimizer'][2])
-        self.optimizers['Category_classifier'].load_state_dict(checkpoint['optimizer'][3])
-        self.optimizers['Domain_classifier'].load_state_dict(checkpoint['optimizer'][4])
-        self.optimizers['Reconstructor'].load_state_dict(checkpoint['optimizer'][5])
+        self.optimizer.load_state_dict(checkpoint['optimizer'])
 
         return iteration, best_accuracy, total_train_loss
 
@@ -85,9 +61,6 @@ class DomainDisentangleExperiment: # See point 2. of the project
         y = y.to(self.device)
         domain = domain.to(self.device)
 
-        self.optimisers_zero(
-            ['Feature_extractor', 'Category_encoder', 'Category_classifier', 'Domain_encoder', 'Domain_classifier', 'Reconstructor']
-        )
 
         logits = self.model(x, train, self.domain_generalization)
         # logits[0] CE+CC
@@ -96,79 +69,21 @@ class DomainDisentangleExperiment: # See point 2. of the project
         # logits[3] CE+DC
         # logits[4] R
 
+        loss_class_1 = self.criterion_CEL(logits[0], y) # CEL of the categories
+        loss_class_2 = self.alpha_cat*(-self.criterion_EL(logits[3]))
+        loss_class = loss_class_1 + loss_class_2 # Category encoder
 
-        # Loss for Category_encoder + Category_classifier
-        logits1 = self.model(x, train, 0, self.domain_generalization)
-        loss_cat_1 = self.weights[0] * self.criterion_CEL(logits1, y) # CEL of the categories
+        loss_domain_1 = self.criterion_CEL(logits[1], domain) # CEL of the domains
+        loss_domain_2 = self.alpha_dom*(-self.criterion_EL(logits[2]))
+        loss_domain = loss_domain_1 + loss_domain_2 # Domain encoder
 
-        loss_cat_1.backward()
+        loss_reconstructor = self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
 
-        self.optimisers_step(
-            ['Feature_extractor', 'Category_encoder', 'Category_classifier']
-        )
+        loss = self.weights[0]*loss_class + self.weights[1]*loss_domain + self.weights[2]*loss_reconstructor
 
-        self.optimisers_zero(
-            ['Feature_extractor', 'Category_encoder', 'Category_classifier']
-        )
-
-        # Loss for Category_encoder + Domain_classifier
-        logits2 = self.model(x, train, 1, self.domain_generalization)
-        loss_cat_2 = self.weights[0] * self.alpha_cat * self.criterion_EL(logits2)
-
-        loss_cat_2.backward()
-
-        self.optimisers_step(
-            ['Feature_extractor', 'Category_encoder']
-        )
-
-        self.optimisers_zero(
-            ['Feature_extractor', 'Category_encoder']
-        )
-
-        # Loss for Domain_encoder + Domain_classifier
-        logits3 = self.model(x, train, 2, self.domain_generalization)
-        loss_dom_1 = self.weights[1] * self.criterion_CEL(logits3, domain) # CEL of the domains
-
-        loss_dom_1.backward()
-
-        self.optimisers_step(
-            ['Feature_extractor', 'Domain_encoder', 'Domain_classifier']
-        )
-
-        self.optimisers_zero(
-            ['Feature_extractor', 'Domain_encoder', 'Domain_classifier']
-        )
-
-        # Loss for Domain_encoder + Category_classifier
-        logits4 = self.model(x, train, 3, self.domain_generalization)
-        loss_dom_2 = self.weights[1] * self.alpha_dom * self.criterion_EL(logits4)
-        
-        loss_dom_2.backward()
-
-        self.optimisers_step(
-            ['Feature_extractor', 'Domain_encoder']
-        )
-
-        self.optimisers_zero(
-            ['Feature_extractor', 'Domain_encoder']
-        )
-
-        # Loss for Reconstructor
-        logits5 = self.model(x, train, 4, self.domain_generalization)
-        loss_reconstructor = self.weights[2] * self.criterion_MSEL(logits5[0], logits5[1]) # Reconstructor
-
-        loss_reconstructor.backward()
-
-        self.optimisers_step(
-            ['Feature_extractor', 'Category_encoder', 'Domain_encoder', 'Reconstructor']
-        )
-
-        self.optimisers_zero(
-            ['Feature_extractor', 'Category_encoder', 'Domain_encoder', 'Reconstructor']
-        )
-
-
-        loss = loss_cat_1 + loss_cat_2 + loss_dom_1 + loss_dom_2 + loss_reconstructor
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
 
         return loss.item()
 
@@ -183,7 +98,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
                 y = y.to(self.device)
                 domain = domain.to(self.device)
 
-                logits = self.model(x, train, 0, False)
+                logits = self.model(x, train, False)
 
                 loss = self.criterion_CEL(logits, y) # Category encoder + Category classifier
 

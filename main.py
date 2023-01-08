@@ -77,29 +77,10 @@ def main(opt):
             # Define scheduler
             # A scheduler dynamically changes learning rate
             # The most common schedule is the step(-down), which multiplies learning rate by gamma every STEP_SIZE epochs
-            schedulers = [
-                torch.optim.lr_scheduler.StepLR(
-                    experiment.optimisers['Feature_extractor'], step_size=4, gamma=0.5
-                ),
-                torch.optim.lr_scheduler.StepLR(
-                    experiment.optimisers['Category_encoder'], step_size=4, gamma=0.5
-                ),
-                torch.optim.lr_scheduler.StepLR(
-                    experiment.optimisers['Domain_encoder'], step_size=4, gamma=0.5
-                ),
-                torch.optim.lr_scheduler.StepLR(
-                    experiment.optimisers['Category_classifier'], step_size=4, gamma=0.5
-                ),
-                torch.optim.lr_scheduler.StepLR(
-                    experiment.optimisers['Domain_classifier'], step_size=4, gamma=0.5
-                ),
-                torch.optim.lr_scheduler.StepLR(
-                    experiment.optimisers['Reconstructor'], step_size=4, gamma=0.5
-                ),
-            ]
+            scheduler = torch.optim.lr_scheduler.StepLR(experiment.optimizer, step_size=4, gamma=0.5)
             best_accuracy = 0
             while iteration < opt['max_iterations']:
-                logging.info(f'Learning rate {schedulers[0].get_lr()} at iteration {iteration}')
+                logging.info(f'Learning rate {scheduler.get_lr()} at iteration {iteration}')
                 for data in train_loader:
 
                     total_train_loss += experiment.train_iteration(data, train=True)
@@ -122,7 +103,7 @@ def main(opt):
                     if iteration > opt['max_iterations']:
                         break
 
-                for s in schedulers: s.step()
+                scheduler.step()
 
             # Test
             print("Testing")
