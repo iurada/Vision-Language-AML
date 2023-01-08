@@ -21,6 +21,20 @@ DOMAINS = {
     'photo': 3,
 }
 
+DESCRIPTORS = {
+    0: 'level of details',
+    1: 'edges',
+    2: 'color saturation',
+    3: 'color shades',
+    4: 'background',
+    5: 'single instance',
+    6: 'text',
+    7: 'texture',
+    8: 'perspective',
+    9: 'realistic',
+    10: 'unrealistic',
+}
+
 
 class PACSDatasetBaseline(Dataset):
     def __init__(self, examples, transform):
@@ -164,7 +178,7 @@ def build_splits_domain_disentangle(opt):
     if opt['dom_gen'] == False:
         source_examples = read_lines(opt['data_path'], source_domain)
         target_examples = read_lines(opt['data_path'], target_domain)
-    else:   #se in dom gen nel source leggo tutto tranne target
+    else:   
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
         source_examples, image_domain_s = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
         target_examples, image_domain_t = read_lines_DG(opt['data_path'], [target_domain])
@@ -246,60 +260,72 @@ class PACSDatasetClipDisentangle(Dataset):
         return len(self.examples)
     
     def __getitem__(self, index):
-        img_path, y, domain = self.examples[index]
+        img_path, desc, y, domain = self.examples[index]
         x = self.transform(Image.open(img_path).convert('RGB'))
-        return x, y, domain
+        return x, desc, y, domain
 
 def getDomain(path):
-    return path.split('/')[0]
+    return path.split('/')[5]
 
 def getCategory(path):
-    return path.split('/')[1]   
+    return path.split('/')[6]   
+
+def pre_proc(vet):
+    desc = ''
+    for i, x in enumerate(vet):
+        desc = desc + DESCRIPTORS[i] + ": " + x + "; "   
+    if len(desc) > 300:     # Truncate at 300
+        desc = desc[0:300]    
+    return desc
 
 def readJSON(domains):
     '''
     return a dictionary with image paths as keys and image descriptions as values
     '''
 
-    with open("./data/LabeledPACS/descriptions.json") as file:
+    with open("./Vision-Language-AML/data/LabeledPACS/descriptions.json") as file:
         #print(file.read())
         data = json.loads(file.read())
 
-        return {i['image_name']: i['descriptions'] for i in data if getDomain(i['image_name']) in domains}      
+        return {("./Vision-Language-AML/data/PACS/kfold/"+i['image_name']): pre_proc(i['descriptions']) for i in data if i['image_name'].split('/')[0] in domains}      
 
 
-def build_splits_clip_disentangle(opt, mode=None):
+def build_splits_clip_disentangle(opt):
+    source_domain = 'art_painting'
+    target_domain = opt['target_domain']
 
-    if mode == None:
-        source_domain = 'art_painting'
-        target_domain = opt['target_domain']
-
+    if opt['dom_gen'] == False:
+        source_examples = read_lines(opt['data_path'], source_domain)
+        target_examples = read_lines(opt['data_path'], target_domain)
+    else:   
+        choices = ['art_painting', 'cartoon', 'sketch', 'photo']
+        source_examples, image_domain_s = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
+        target_examples, image_domain_t = read_lines_DG(opt['data_path'], [target_domain])
         
     source_examples_dict = readJSON([source_domain])
     target_examples_dict = readJSON([target_domain])
-
+    
     '''
     create dict with category as key and list of (path, description) as value
     '''
     source_examples = dict()
     for k,v in source_examples_dict.items():
-        if getCategory(k) in source_examples:
-            source_examples[getCategory(k)].append((k, v))
+        if CATEGORIES[getCategory(k)] in source_examples:
+            source_examples[CATEGORIES[getCategory(k)]].append((k, v))
         else:
-            source_examples[getCategory(k)] = list()
-            source_examples[getCategory(k)].append((k,v))
+            source_examples[CATEGORIES[getCategory(k)]] = list()
+            source_examples[CATEGORIES[getCategory(k)]].append((k,v))
 
     target_examples = dict()
     for k,v in target_examples_dict.items():
-        if getCategory(k) in target_examples:
-            target_examples[getCategory(k)].append((k, v))
+        if CATEGORIES[getCategory(k)] in target_examples:
+            target_examples[CATEGORIES[getCategory(k)]].append((k, v))
         else:
-            target_examples[getCategory(k)] = list()
-            target_examples[getCategory(k)].append((k,v))
+            target_examples[CATEGORIES[getCategory(k)]] = list()
+            target_examples[CATEGORIES[getCategory(k)]].append((k,v))
                     
     
-
-    # Compute ratios of examples for each category
+   # Compute ratios of examples for each category
     source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
     source_total_examples = sum(source_category_ratios.values())
     source_category_ratios = {category_idx: c / source_total_examples for category_idx, c in source_category_ratios.items()}
@@ -307,15 +333,13 @@ def build_splits_clip_disentangle(opt, mode=None):
     # Build splits - we train only on the source domain (Art Painting)
     source_val_split_length = source_total_examples * 0.2 # 20% of the training split used for validation
 
-    tot_source = sum([len(v) for k,v in source_examples.items()])
-    tot_target = sum([len(v) for k,v in target_examples.items()])
+    # Compute ratios of examples for each category
+    target_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in target_examples.items()}
+    target_total_examples = sum(target_category_ratios.values())
+    target_category_ratios = {category_idx: c / target_total_examples for category_idx, c in target_category_ratios.items()}
 
-    domain_ratios = {
-        0: tot_source/(tot_source+tot_target),
-        1: tot_target/(tot_source+tot_target),
-    } 
-
-    domain_val_split_length = (tot_source+tot_target)*0.2
+    # Build splits - we train only on the source domain (Art Painting)
+    target_val_split_length = target_total_examples * 0.2 # 20% of the training split used for validation
 
     train_examples_source = []
     val_examples_source = []
@@ -323,48 +347,26 @@ def build_splits_clip_disentangle(opt, mode=None):
     val_examples_target = []
     test_examples = []
     
-    domain_dict = {
-        0: [],
-        1: [],
-    }
-
     for category, examples_list in source_examples.items():
         split_idx = round(source_category_ratios[category] * source_val_split_length)
-        domain_dict[0] += [(category, _) for _ in examples_list]
         for i, example in enumerate(examples_list):
-            if i > split_idx:
-                train_examples_source.append([example, category, 0])
+            if opt['dom_gen'] == False: 
+                train_examples_source.append([example[0], example[1], category, 0]) if i>split_idx else val_examples_source.append([example[0], example[1], category, 0])
             else:
-                val_examples_source.append([example, category, 0])
+                train_examples_source.append([example[0], example[1], category, image_domain_s[example]]) if i>split_idx else val_examples_source.append([example[0], example[1], category, image_domain_s[example]])
     
     for category, examples_list in target_examples.items():
-        domain_dict[1] += [(category, _) for _ in examples_list]
-        for i in examples_list:
-          test_examples.append([i, category, 1])
-
-    for domain, examples_list in domain_dict.items():
-        split_idx = round(domain_ratios[domain] * domain_val_split_length)
+        split_idx = round(target_category_ratios[category] * target_val_split_length)
         for i, example in enumerate(examples_list):
-            if i > split_idx:
-                train_examples_target.append([example[1], example[0], domain])
-            else:
-                val_examples_target.append([example[1], example[0], domain])
-
-    print(f'Train_example source {train_examples_source[0]} {len(train_examples_source)}')
-    print(f'Train_example target {train_examples_target[0]} {len(train_examples_target)}')
-    print(f'Val_example source {val_examples_source[0]} {len(val_examples_source)}')
-    print(f'Val_example target {val_examples_target[0]} {len(val_examples_target)}')
-
-    print(sum(1 for _ in train_examples_source if _[1] == 0))
-    print(sum(1 for _ in train_examples_source if _[1] == 1))
-    print(sum(1 for _ in train_examples_source if _[1] == 2))
-    print(sum(1 for _ in train_examples_source if _[1] == 3))
-    print(sum(1 for _ in train_examples_source if _[1] == 4))
-    print(sum(1 for _ in train_examples_source if _[1] == 5))
-    print(sum(1 for _ in train_examples_source if _[1] == 6))
-    print(sum(1 for _ in train_examples_target if _[2] == 0))
-    print(sum(1 for _ in train_examples_target if _[2] == 1))            
-
+            if opt['dom_gen'] == False: 
+                test_examples.append([example[0], example[1], category, 1])
+                train_examples_target.append([example[0], example[1], 42, 1]) if i>split_idx else val_examples_target.append([example[0], example[1], category, 1])
+            else:   #se sono in dom gen passo anche dominio
+                test_examples.append([example[0], example[1], category, image_domain_t[example]])
+                train_examples_target.append([example[0], example[1], 42, image_domain_t[example]]) if i>split_idx else val_examples_target.append([example[0], example[1], category, image_domain_t[example]])
+                
+    train_examples = train_examples_source + train_examples_target
+    val_examples = val_examples_source + val_examples_target
 
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
@@ -384,13 +386,9 @@ def build_splits_clip_disentangle(opt, mode=None):
         normalize
     ])
 
-    # Dataloaders
-    train_loader_1 = DataLoader(PACSDatasetDomainDisentangle(train_examples_source, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True) 
-    train_loader_2 = DataLoader(PACSDatasetDomainDisentangle(train_examples_target, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    val_loader_1 = DataLoader(PACSDatasetDomainDisentangle(val_examples_source, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
-    val_loader_2 = DataLoader(PACSDatasetDomainDisentangle(val_examples_target, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
-    test_loader = DataLoader(PACSDatasetDomainDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
-
-    return train_loader_1, train_loader_2, val_loader_1, val_loader_2, test_loader
-
-
+    # Dataloaders 
+    train_loader = DataLoader(PACSDatasetClipDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+    val_loader = DataLoader(PACSDatasetClipDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    test_loader = DataLoader(PACSDatasetClipDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+    
+    return train_loader, val_loader, test_loader

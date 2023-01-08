@@ -45,7 +45,7 @@ def main(opt):
         else:
             logging.info(opt)
 
-        if opt['experiment'] == 'baseline' or opt['experiment'] == 'baseline_DG':
+        if opt['experiment'] == 'baseline':
             # Train loop
             while iteration < opt['max_iterations']:
                 for data in train_loader:
@@ -77,11 +77,29 @@ def main(opt):
             # Define scheduler
             # A scheduler dynamically changes learning rate
             # The most common schedule is the step(-down), which multiplies learning rate by gamma every STEP_SIZE epochs
-            scheduler = torch.optim.lr_scheduler.StepLR(experiment.optimizer, step_size=4, gamma=0.5)
-            # Train loops 
+            schedulers = [
+                torch.optim.lr_scheduler.StepLR(
+                    experiment.optimisers['Feature_extractor'], step_size=4, gamma=0.5
+                ),
+                torch.optim.lr_scheduler.StepLR(
+                    experiment.optimisers['Category_encoder'], step_size=4, gamma=0.5
+                ),
+                torch.optim.lr_scheduler.StepLR(
+                    experiment.optimisers['Domain_encoder'], step_size=4, gamma=0.5
+                ),
+                torch.optim.lr_scheduler.StepLR(
+                    experiment.optimisers['Category_classifier'], step_size=4, gamma=0.5
+                ),
+                torch.optim.lr_scheduler.StepLR(
+                    experiment.optimisers['Domain_classifier'], step_size=4, gamma=0.5
+                ),
+                torch.optim.lr_scheduler.StepLR(
+                    experiment.optimisers['Reconstructor'], step_size=4, gamma=0.5
+                ),
+            ]
             best_accuracy = 0
             while iteration < opt['max_iterations']:
-                logging.info(f'Learning rate {scheduler.get_lr()} at iteration {iteration}')
+                logging.info(f'Learning rate {schedulers[0].get_lr()} at iteration {iteration}')
                 for data in train_loader:
 
                     total_train_loss += experiment.train_iteration(data, train=True)
@@ -100,6 +118,48 @@ def main(opt):
                             experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss)
                         experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
 
+                    iteration += 1
+                    if iteration > opt['max_iterations']:
+                        break
+
+                for s in schedulers: s.step()
+
+            # Test
+            print("Testing")
+            experiment.load_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth')
+            test_accuracy, _ = experiment.validate(test_loader, train=False)
+            logging.info(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
+            print(f'[TEST] Accuracy: {(100 * test_accuracy):.2f}')
+        
+        elif opt['experiment'] == 'clip_disentangle':    
+            print('Training')
+            # Define scheduler
+            # A scheduler dynamically changes learning rate
+            # The most common schedule is the step(-down), which multiplies learning rate by gamma every STEP_SIZE epochs
+            scheduler = torch.optim.lr_scheduler.StepLR(experiment.optimizer, step_size=4, gamma=0.5)
+            # Train loops 
+            best_accuracy = 0
+            while iteration < opt['max_iterations']:
+                logging.info(f'Learning rate {scheduler.get_lr()} at iteration {iteration}')
+                for data in train_loader: # Data is (path, descriptions array)
+                    
+                    total_train_loss += experiment.train_iteration(data, train=True)
+
+                    if iteration % opt['print_every'] == 0:
+                        print(f'[TRAIN - {iteration}] Loss: {total_train_loss / (iteration + 1)}')
+                    
+                    
+                    if iteration % opt['validate_every'] == 0:
+                        # Run validation
+                        print("Run validation")
+                        val_accuracy, val_loss = experiment.validate(validation_loader, train=False)
+                        print(f'[VAL - {iteration}] Loss: {val_loss} | Accuracy: {(100 * val_accuracy):.2f}')
+                        if val_accuracy > best_accuracy:
+                            print("Saving model...")
+                            best_accuracy = val_accuracy
+                            experiment.save_checkpoint(f'{opt["output_path"]}/best_checkpoint.pth', iteration, best_accuracy, total_train_loss)
+                        experiment.save_checkpoint(f'{opt["output_path"]}/last_checkpoint.pth', iteration, best_accuracy, total_train_loss)
+                    
                     iteration += 1
                     if iteration > opt['max_iterations']:
                         break

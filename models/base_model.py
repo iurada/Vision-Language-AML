@@ -55,3 +55,31 @@ class DomainDisentangleModel(nn.Module):
             fcs = self.category_encoder(f)
             cc = self.category_classifier(fcs)
             return cc
+
+class CLIPDisentangleModel(nn.Module):
+    def __init__(self):
+        super(CLIPDisentangleModel, self).__init__()
+        self.feature_extractor = FeatureExtractor()
+        self.category_encoder= CategoryEncoder()
+        self.domain_encoder = DomainEncoder()
+        self.category_classifier = CategoryClassifier()
+        self.domain_classifier = DomainClassifier()
+        self.reconstructor = Reconstructor()
+
+    def forward(self, x, train, domain_generalization): #domain_generalization bandiera per punto 5
+
+        if train == True:
+            f = self.feature_extractor(x)
+            fcs = self.category_encoder(f)
+            fds = self.domain_encoder(f)
+            cc = self.category_classifier(fcs)
+            dd = self.domain_classifier(fds, domain_generalization) 
+            cd = self.category_classifier(fds)
+            dc = self.domain_classifier(fcs, domain_generalization)
+            r = self.reconstructor(torch.cat((fds, fcs), 1))
+            return cc, dd, cd, dc, r, f, fds
+        else:
+            f = self.feature_extractor(x)
+            fcs = self.category_encoder(f)
+            cc = self.category_classifier(fcs)
+            return cc            

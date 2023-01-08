@@ -103,17 +103,17 @@ class Reconstructor(nn.Module):
     def __init__(self):
         super(Reconstructor, self).__init__()
         self.feature_reconstructor = nn.Sequential(
-            nn.ReLU(),
-            nn.BatchNorm1d(1024),
             nn.Linear(1024, 512),
-
-            nn.ReLU(),
             nn.BatchNorm1d(512),
-            nn.Linear(512, 512),
-
             nn.ReLU(),
-            nn.BatchNorm1d(512),
+
             nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
+
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(),
         )
 
     def forward(self, x):
