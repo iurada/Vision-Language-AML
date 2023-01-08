@@ -92,7 +92,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
         # logits[4] R
 
         loss_class_1 = self.criterion_CEL(logits[0], y) # CEL of the categories
-        loss_class_2 = self.alpha_cat*(-self.criterion_EL(logits[3]))
+        loss_class_2 = self.alpha_cat * self.criterion_EL(logits[3])
+        loss_class_2 = - loss_class_2
         loss_class = loss_class_1 + loss_class_2 # Category encoder
         loss_class = self.weights[0] * loss_class 
 
@@ -107,7 +108,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
         )
 
         loss_domain_1 = self.criterion_CEL(logits[1], domain) # CEL of the domains
-        loss_domain_2 = self.alpha_dom*(-self.criterion_EL(logits[2]))
+        loss_domain_2 = self.alpha_dom * self.criterion_EL(logits[2])
+        loss_domain_2 = - loss_domain_2
         loss_domain = loss_domain_1 + loss_domain_2 # Domain encoder
         loss_domain = self.weights[1] * loss_domain
 
