@@ -181,7 +181,7 @@ def build_splits_domain_disentangle(opt):
     else:   
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
         source_examples, image_domain_s = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
-        target_examples, image_domain_t = read_lines_DG(opt['data_path'], [target_domain])
+        target_examples, _ = read_lines_DG(opt['data_path'], [target_domain])
     
     # Compute ratios of examples for each category
     source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
@@ -220,11 +220,14 @@ def build_splits_domain_disentangle(opt):
                 test_examples.append([example, category, 1])
                 train_examples_target.append([example, 42, 1]) if i>split_idx else val_examples_target.append([example, category, 1])
             else:   #se sono in dom gen passo anche dominio
-                test_examples.append([example, category, image_domain_t[example]])
-                train_examples_target.append([example, 42, image_domain_t[example]]) if i>split_idx else val_examples_target.append([example, category, image_domain_t[example]])
-                
-    train_examples = train_examples_source + train_examples_target
-    val_examples = val_examples_source + val_examples_target
+                test_examples.append([example, category, 1])
+    
+    if opt['dom_gen'] == False:
+        train_examples = train_examples_source + train_examples_target
+        val_examples = val_examples_source + val_examples_target
+    else:
+        train_examples = train_examples_source
+        val_examples = val_examples_source
 
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
@@ -360,10 +363,13 @@ def build_splits_clip_disentangle(opt):
                 train_examples_target.append([example[0], example[1], 42, 1]) if i>split_idx else val_examples_target.append([example[0], example[1], category, 1])
             else:   
                 test_examples.append([example[0], example[1], category, DOMAINS[getDomain(example[0])]])
-                train_examples_target.append([example[0], example[1], 42, DOMAINS[getDomain(example[0])]]) if i>split_idx else val_examples_target.append([example[0], example[1], category, DOMAINS[getDomain(example[0])]])
                 
-    train_examples = train_examples_source + train_examples_target
-    val_examples = val_examples_source + val_examples_target
+    if opt['dom_gen'] == False:            
+        train_examples = train_examples_source + train_examples_target
+        val_examples = val_examples_source + val_examples_target
+    else:
+        train_examples = train_examples_source
+        val_examples = val_examples_source
 
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
