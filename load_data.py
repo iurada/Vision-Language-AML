@@ -49,6 +49,12 @@ class PACSDatasetBaseline(Dataset):
         x = self.transform(Image.open(img_path).convert('RGB'))
         return x, y
 
+def assign_domain_labels(target_domain):
+    if target_domain != 'photo':
+        current = DOMAINS[target_domain]
+        DOMAINS['photo'] = current
+        DOMAINS[target_domain] = 3
+
 def read_lines(data_path, domain_name):
     examples = {}
     
@@ -180,6 +186,7 @@ def build_splits_domain_disentangle(opt):
         target_examples = read_lines(opt['data_path'], target_domain)
     else:   
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
+        assign_domain_labels(target_domain)
         source_examples, image_domain_s = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
         target_examples, _ = read_lines_DG(opt['data_path'], [target_domain])
     
@@ -302,6 +309,7 @@ def build_splits_clip_disentangle(opt):
         target_examples_dict = readJSON([target_domain])
     else:   
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
+        assign_domain_labels(target_domain)
         source_examples_dict = readJSON([c for c in choices if c != target_domain])
         target_examples_dict = readJSON([target_domain])
         
