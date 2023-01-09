@@ -54,7 +54,7 @@ class DomainDisentangleModel(nn.Module):
             f = self.feature_extractor(x)
             fcs = self.category_encoder(f)
             cc = self.category_classifier(fcs)
-            return         
+            return cc         
 
 class CLIPDisentangleModel(nn.Module):
     def __init__(self):
@@ -82,4 +82,4 @@ class CLIPDisentangleModel(nn.Module):
             f = self.feature_extractor(x)
             fcs = self.category_encoder(f)
             cc = self.category_classifier(fcs)
-            return             
+            return cc            

@@ -65,6 +65,8 @@ class CLIPDisentangleExperiment:
         x, desc, y, domain = data
         
         x = x.to(self.device)
+        tokenized_desc = clip.tokenize(desc).to(self.device)
+        logit_clip = self.clip_model.encode_text(tokenized_desc)
         y = y.to(self.device)
         domain = domain.to(self.device)
 
@@ -77,9 +79,6 @@ class CLIPDisentangleExperiment:
         # logits[5] F
         # logits[6] FDS
         
-        tokenized_desc = clip.tokenize(desc).to(self.device)
-        logit_clip = self.clip_model.encode_text(tokenized_desc)
-        # logit_clip = features generate from text
 
         loss_class_1 = self.criterion_CEL(logits[0], y) # CEL of the categories
         loss_class_2 = self.alpha_cat*(-self.criterion_EL(logits[3]))
@@ -107,10 +106,9 @@ class CLIPDisentangleExperiment:
         count = 0
         loss = 0
         with torch.no_grad():
-            for x, desc, y, domain in loader:
+            for x, _, y, _ in loader:
                 x = x.to(self.device)
                 y = y.to(self.device)
-                domain = domain.to(self.device)
 
                 logits = self.model(x, train, False)
 
