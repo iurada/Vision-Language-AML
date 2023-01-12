@@ -274,6 +274,19 @@ class PACSDatasetClipDisentangle(Dataset):
         x = self.transform(Image.open(img_path).convert('RGB'))
         return x, desc, y, domain
 
+class PACSDatasetClipPreTraining(Dataset):
+    def __init__(self, examples, transform):
+        self.examples = examples
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.examples)
+    
+    def __getitem__(self, index):
+        img_path, desc = self.examples[index]
+        x = self.transform(Image.open(img_path).convert('RGB'))
+        return x, desc
+
 def getDomain(path):
     return path.split('/')[5]
 
@@ -408,7 +421,7 @@ def build_splits_clip_disentangle(opt):
         
         return train_loader, val_loader, test_loader
     else:
-        train_clip_loader = DataLoader(PACSDatasetClipDisentangle(train_clip, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        train_clip_loader = DataLoader(PACSDatasetClipPreTraining(train_clip, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
         train_loader = DataLoader(PACSDatasetClipDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
         val_loader = DataLoader(PACSDatasetClipDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
         test_loader = DataLoader(PACSDatasetClipDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
