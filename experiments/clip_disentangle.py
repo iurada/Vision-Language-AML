@@ -51,8 +51,8 @@ class CLIPDisentangleExperiment:
         # Set Domain Generalization
         self.domain_generalization = opt['dom_gen']
 
-    def convert_models_to_fp32(model): 
-        for p in model.parameters(): 
+    def convert_models_to_fp32(self): 
+        for p in self.clip_model.parameters(): 
             p.data = p.data.float() 
             p.grad.data = p.grad.data.float()
 
@@ -96,7 +96,7 @@ class CLIPDisentangleExperiment:
         if self.device == "cpu":
             self.optimizer_clip.step()
         else : 
-            self.convert_models_to_fp32(self.clip_model)
+            self.convert_models_to_fp32()
             self.clip_optimizer.step()
             clip.model.convert_weights(self.clip_model)
 
