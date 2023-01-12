@@ -18,7 +18,7 @@ class CLIPDisentangleExperiment:
             param.requires_grad = True
 
         # Setup CLIP model
-        if opt['clip_pretrained'] == True:
+        if opt['clip_pretrained'] == 'True':
             self.clip_model, _ = clip.load('ViT-B/32', device='cpu') # load it first to CPU to ensure you're using fp32 precision.
         else:
             self.clip_model, _ = clip.load('ViT-B/32', device='cpu', jit=False) # load it first to CPU to ensure you're using fp32 precision.

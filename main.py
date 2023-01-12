@@ -20,7 +20,7 @@ def setup_experiment(opt):
         return experiment, train_loader, validation_loader, test_loader
     elif opt['experiment'] == 'clip_disentangle':
         experiment = CLIPDisentangleExperiment(opt)
-        if opt['clip_pretrained'] == True:
+        if opt['clip_pretrained'] == 'True':
             train_loader, validation_loader, test_loader = build_splits_clip_disentangle(opt)
             return experiment, train_loader, validation_loader, test_loader
         else:
@@ -36,7 +36,7 @@ def main(opt):
     elif opt['experiment'] == 'domain_disentangle':
         experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
     elif opt['experiment'] == 'clip_disentangle':
-        if opt['clip_pretrained'] == True:
+        if opt['clip_pretrained'] == 'True':
             experiment, train_loader, validation_loader, test_loader = setup_experiment(opt)
         else:
             experiment, train_loader, validation_loader, test_loader, train_clip_loader = setup_experiment(opt)
@@ -122,7 +122,7 @@ def main(opt):
         elif opt['experiment'] == 'clip_disentangle':    
             print('Training')
             
-            if opt['clip_pretrained'] == False:
+            if opt['clip_pretrained'] == 'False':
                 print('Clip training')
                 for epoch in range(opt['clip_epochs']):
                     for batch in train_clip_loader:

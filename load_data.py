@@ -313,7 +313,7 @@ def build_splits_clip_disentangle(opt):
         source_examples_dict = readJSON([c for c in choices if c != target_domain])
         target_examples_dict = readJSON([target_domain])
 
-    if opt['clip_pretrained'] == False:
+    if opt['clip_pretrained'] == 'False':
         train_clip = readJSON(['art_painting', 'cartoon', 'sketch', 'photo'])
         
     '''
@@ -401,7 +401,7 @@ def build_splits_clip_disentangle(opt):
     ])
 
     # Dataloaders 
-    if opt['clip_pretrained'] == True:
+    if opt['clip_pretrained'] == 'True':
         train_loader = DataLoader(PACSDatasetClipDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
         val_loader = DataLoader(PACSDatasetClipDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
         test_loader = DataLoader(PACSDatasetClipDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
