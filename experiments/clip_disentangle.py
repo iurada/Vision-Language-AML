@@ -25,8 +25,12 @@ class CLIPDisentangleExperiment:
         
         self.clip_model = self.clip_model.to(self.device)
         self.clip_model.eval()
-        for param in self.clip_model.parameters():
-            param.requires_grad = False    #to freeze the clip model
+        if opt['clip_pretrained'] == 'True':
+            for param in self.clip_model.parameters():
+                param.requires_grad = False    #to freeze the clip model
+        else:
+            for param in self.clip_model.parameters():
+                param.requires_grad = True
 
         # Setup optimization procedure
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
@@ -87,7 +91,7 @@ class CLIPDisentangleExperiment:
 
         ground_truth = torch.arange(len(images),dtype=torch.long,device=self.device)
 
-        total_loss = (self.loss_img(logits_per_image,ground_truth) + self.loss_txt(logits_per_text,ground_truth))/2
+        total_loss = (self.loss_img(logits_per_image, ground_truth) + self.loss_txt(logits_per_text, ground_truth))/2
         total_loss.backward()
         if self.device == "cpu":
             self.optimizer_clip.step()
