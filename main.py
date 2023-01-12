@@ -128,6 +128,13 @@ def main(opt):
                     for batch in train_clip_loader:
                         experiment.train_iteration_clip(batch)
 
+                        if iteration % opt['print_every'] == 0:
+                            print(f'[CLIP TRAIN - {iteration}]')
+
+                        iteration += 1
+                        if iteration > opt['clip_epochs']:
+                            break
+
             # Define scheduler
             # A scheduler dynamically changes learning rate
             # The most common schedule is the step(-down), which multiplies learning rate by gamma every STEP_SIZE epochs
