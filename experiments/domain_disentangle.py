@@ -17,7 +17,7 @@ class DomainDisentangleExperiment: # See point 2. of the project
             param.requires_grad = True
 
         # Setup optimization procedure
-        self.optimizer = torch.optim.Adam(self.model.feature_extractor.parameters(), lr=opt['lr'])
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
 
         self.criterion_CEL = torch.nn.CrossEntropyLoss(ignore_index=42)     #ingnore index 42 that is put to discriminate the target
         self.criterion_MSEL = torch.nn.MSELoss()

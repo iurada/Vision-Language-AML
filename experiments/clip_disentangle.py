@@ -18,7 +18,11 @@ class CLIPDisentangleExperiment:
             param.requires_grad = True
 
         # Setup CLIP model
-        self.clip_model, _ = clip.load('ViT-B/32', device='cpu') # load it first to CPU to ensure you're using fp32 precision.
+        if opt['clip_pretrained'] == True:
+            self.clip_model, _ = clip.load('ViT-B/32', device='cpu') # load it first to CPU to ensure you're using fp32 precision.
+        else:
+            self.clip_model, _ = clip.load('ViT-B/32', device='cpu', jit=False) # load it first to CPU to ensure you're using fp32 precision.
+        
         self.clip_model = self.clip_model.to(self.device)
         self.clip_model.eval()
         for param in self.clip_model.parameters():
@@ -26,9 +30,14 @@ class CLIPDisentangleExperiment:
 
         # Setup optimization procedure
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
+        self.clip_optimizer = torch.optim.Adam(self.clip_model.parameters(), lr=5e-5,betas=(0.9,0.98),eps=1e-6,weight_decay=0.2)
+        
         self.criterion_CEL = torch.nn.CrossEntropyLoss(ignore_index=42)     #ingnore index 42 that is put to discriminate the target
         self.criterion_MSEL = torch.nn.MSELoss()
         self.criterion_EL = EntropyLoss()
+
+        self.loss_img = nn.CrossEntropyLoss()
+        self.loss_txt = nn.CrossEntropyLoss()
 
         # Setup loss weights
         self.weights = [3, 1.5, 0.5, 1] 
@@ -37,6 +46,11 @@ class CLIPDisentangleExperiment:
 
         # Set Domain Generalization
         self.domain_generalization = opt['dom_gen']
+
+    def convert_models_to_fp32(model): 
+        for p in model.parameters(): 
+            p.data = p.data.float() 
+            p.grad.data = p.grad.data.float()
 
     def save_checkpoint(self, path, iteration, best_accuracy, total_train_loss):
         checkpoint = {}
@@ -61,12 +75,32 @@ class CLIPDisentangleExperiment:
 
         return iteration, best_accuracy, total_train_loss
 
+    def train_iteration_clip(self, data):
+        self.clip_optimizer.zero_grad()
+
+        images, texts, _, _ = data
+        
+        images= images.to(self.device)
+        texts = texts.to(self.device)
+        
+        logits_per_image, logits_per_text = self.clip_model(images, texts)
+
+        ground_truth = torch.arange(len(images),dtype=torch.long,device=self.device)
+
+        total_loss = (self.loss_img(logits_per_image,ground_truth) + self.loss_txt(logits_per_text,ground_truth))/2
+        total_loss.backward()
+        if self.device == "cpu":
+            self.optimizer_clip.step()
+        else : 
+            self.convert_models_to_fp32(self.clip_model)
+            self.clip_optimizer.step()
+            clip.model.convert_weights(self.clip_model)
+
     def train_iteration(self, data, train): #train flag se false per validation/test
         x, desc, y, domain = data
         
         x = x.to(self.device)
         tokenized_desc = clip.tokenize(desc).to(self.device)
-        logit_clip = self.clip_model.encode_text(tokenized_desc)
         y = y.to(self.device)
         domain = domain.to(self.device)
 
@@ -78,6 +112,7 @@ class CLIPDisentangleExperiment:
         # logits[4] R
         # logits[5] F
         # logits[6] FDS
+        clip_logit = self.clip_model.encode_text(tokenized_desc)
         
 
         loss_class_1 = self.criterion_CEL(logits[0], y) # CEL of the categories
@@ -90,7 +125,7 @@ class CLIPDisentangleExperiment:
 
         loss_reconstructor = self.criterion_MSEL(logits[4], logits[5]) # Reconstructor
 
-        loss_clip = self.criterion_MSEL(logit_clip, logits[6])
+        loss_clip = self.criterion_MSEL(clip_logit, logits[6])
 
         loss = self.weights[0]*loss_class + self.weights[1]*loss_domain + self.weights[2]*loss_reconstructor + self.weights[3]*loss_clip
 

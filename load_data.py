@@ -312,6 +312,9 @@ def build_splits_clip_disentangle(opt):
         assign_domain_labels(target_domain)
         source_examples_dict = readJSON([c for c in choices if c != target_domain])
         target_examples_dict = readJSON([target_domain])
+
+    if opt['clip_pretrained'] == False:
+        train_clip = readJSON(['art_painting', 'cartoon', 'sketch', 'photo'])
         
     '''
     create dict with category as key and list of (path, description) as value
@@ -398,8 +401,16 @@ def build_splits_clip_disentangle(opt):
     ])
 
     # Dataloaders 
-    train_loader = DataLoader(PACSDatasetClipDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    val_loader = DataLoader(PACSDatasetClipDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    test_loader = DataLoader(PACSDatasetClipDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
-    
-    return train_loader, val_loader, test_loader
+    if opt['clip_pretrained'] == True:
+        train_loader = DataLoader(PACSDatasetClipDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        val_loader = DataLoader(PACSDatasetClipDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        test_loader = DataLoader(PACSDatasetClipDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+        
+        return train_loader, val_loader, test_loader
+    else:
+        train_clip_loader = DataLoader(PACSDatasetClipDisentangle(train_clip, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        train_loader = DataLoader(PACSDatasetClipDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        val_loader = DataLoader(PACSDatasetClipDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        test_loader = DataLoader(PACSDatasetClipDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+        
+        return train_loader, val_loader, test_loader, train_clip_loader
