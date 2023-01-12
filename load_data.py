@@ -327,7 +327,8 @@ def build_splits_clip_disentangle(opt):
         target_examples_dict = readJSON([target_domain])
 
     if opt['clip_pretrained'] == 'False':
-        train_clip = readJSON(['art_painting', 'cartoon', 'sketch', 'photo'])
+        clip_examples = readJSON(['art_painting', 'cartoon', 'sketch', 'photo'])
+        train_clip = [[img_path, desc] for img_path, desc in clip_examples.items()]
         
     '''
     create dict with category as key and list of (path, description) as value

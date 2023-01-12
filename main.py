@@ -124,7 +124,7 @@ def main(opt):
             
             if opt['clip_pretrained'] == 'False':
                 print('Clip training')
-                for epoch in range(opt['clip_epochs']):
+                while iteration < opt['clip_epochs']:
                     for batch in train_clip_loader:
                         experiment.train_iteration_clip(batch)
 
@@ -134,6 +134,7 @@ def main(opt):
             scheduler = torch.optim.lr_scheduler.StepLR(experiment.optimizer, step_size=4, gamma=0.5)
             # Train loops 
             best_accuracy = 0
+            iteration = 0
             while iteration < opt['max_iterations']:
                 logging.info(f'Learning rate {scheduler.get_lr()} at iteration {iteration}')
                 for data in train_loader: # Data is (path, descriptions array)
