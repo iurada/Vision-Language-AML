@@ -49,6 +49,12 @@ class PACSDatasetBaseline(Dataset):
         x = self.transform(Image.open(img_path).convert('RGB'))
         return x, y
 
+def assign_domain_labels(target_domain):
+    if target_domain != 'photo':
+        current = DOMAINS[target_domain]
+        DOMAINS['photo'] = current
+        DOMAINS[target_domain] = 3
+
 def read_lines(data_path, domain_name):
     examples = {}
     
@@ -180,8 +186,9 @@ def build_splits_domain_disentangle(opt):
         target_examples = read_lines(opt['data_path'], target_domain)
     else:   
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
+        assign_domain_labels(target_domain)
         source_examples, image_domain_s = read_lines_DG(opt['data_path'], [c for c in choices if c != target_domain])
-        target_examples, image_domain_t = read_lines_DG(opt['data_path'], [target_domain])
+        target_examples, _ = read_lines_DG(opt['data_path'], [target_domain])
     
     # Compute ratios of examples for each category
     source_category_ratios = {category_idx: len(examples_list) for category_idx, examples_list in source_examples.items()}
@@ -220,11 +227,14 @@ def build_splits_domain_disentangle(opt):
                 test_examples.append([example, category, 1])
                 train_examples_target.append([example, 42, 1]) if i>split_idx else val_examples_target.append([example, category, 1])
             else:   #se sono in dom gen passo anche dominio
-                test_examples.append([example, category, image_domain_t[example]])
-                train_examples_target.append([example, 42, image_domain_t[example]]) if i>split_idx else val_examples_target.append([example, category, image_domain_t[example]])
-                
-    train_examples = train_examples_source + train_examples_target
-    val_examples = val_examples_source + val_examples_target
+                test_examples.append([example, category, 1])
+    
+    if opt['dom_gen'] == False:
+        train_examples = train_examples_source + train_examples_target
+        val_examples = val_examples_source + val_examples_target
+    else:
+        train_examples = train_examples_source
+        val_examples = val_examples_source
 
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
@@ -264,6 +274,19 @@ class PACSDatasetClipDisentangle(Dataset):
         x = self.transform(Image.open(img_path).convert('RGB'))
         return x, desc, y, domain
 
+class PACSDatasetClipPreTraining(Dataset):
+    def __init__(self, examples, transform):
+        self.examples = examples
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.examples)
+    
+    def __getitem__(self, index):
+        img_path, desc = self.examples[index]
+        x = self.transform(Image.open(img_path).convert('RGB'))
+        return x, desc
+
 def getDomain(path):
     return path.split('/')[5]
 
@@ -299,8 +322,13 @@ def build_splits_clip_disentangle(opt):
         target_examples_dict = readJSON([target_domain])
     else:   
         choices = ['art_painting', 'cartoon', 'sketch', 'photo']
+        assign_domain_labels(target_domain)
         source_examples_dict = readJSON([c for c in choices if c != target_domain])
         target_examples_dict = readJSON([target_domain])
+
+    if opt['clip_pretrained'] == 'False':
+        clip_examples = readJSON(['art_painting', 'cartoon', 'sketch', 'photo'])
+        train_clip = [[img_path, desc] for img_path, desc in clip_examples.items()]
         
     '''
     create dict with category as key and list of (path, description) as value
@@ -360,10 +388,13 @@ def build_splits_clip_disentangle(opt):
                 train_examples_target.append([example[0], example[1], 42, 1]) if i>split_idx else val_examples_target.append([example[0], example[1], category, 1])
             else:   
                 test_examples.append([example[0], example[1], category, DOMAINS[getDomain(example[0])]])
-                train_examples_target.append([example[0], example[1], 42, DOMAINS[getDomain(example[0])]]) if i>split_idx else val_examples_target.append([example[0], example[1], category, DOMAINS[getDomain(example[0])]])
                 
-    train_examples = train_examples_source + train_examples_target
-    val_examples = val_examples_source + val_examples_target
+    if opt['dom_gen'] == False:            
+        train_examples = train_examples_source + train_examples_target
+        val_examples = val_examples_source + val_examples_target
+    else:
+        train_examples = train_examples_source
+        val_examples = val_examples_source
 
     # Transforms
     normalize = T.Normalize([0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) # ResNet18 - ImageNet Normalization
@@ -384,8 +415,16 @@ def build_splits_clip_disentangle(opt):
     ])
 
     # Dataloaders 
-    train_loader = DataLoader(PACSDatasetClipDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    val_loader = DataLoader(PACSDatasetClipDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
-    test_loader = DataLoader(PACSDatasetClipDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
-    
-    return train_loader, val_loader, test_loader
+    if opt['clip_pretrained'] == 'True':
+        train_loader = DataLoader(PACSDatasetClipDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        val_loader = DataLoader(PACSDatasetClipDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        test_loader = DataLoader(PACSDatasetClipDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+        
+        return train_loader, val_loader, test_loader
+    else:
+        train_clip_loader = DataLoader(PACSDatasetClipPreTraining(train_clip, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        train_loader = DataLoader(PACSDatasetClipDisentangle(train_examples, train_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        val_loader = DataLoader(PACSDatasetClipDisentangle(val_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=True)
+        test_loader = DataLoader(PACSDatasetClipDisentangle(test_examples, eval_transform), batch_size=opt['batch_size'], num_workers=opt['num_workers'], shuffle=False)
+        
+        return train_loader, val_loader, test_loader, train_clip_loader
