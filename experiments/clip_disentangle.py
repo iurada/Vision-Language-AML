@@ -78,7 +78,7 @@ class CLIPDisentangleExperiment:
     def train_iteration_clip(self, data):
         self.clip_optimizer.zero_grad()
 
-        images, texts, _, _ = data
+        images, texts = data
         
         images= images.to(self.device)
         texts = texts.to(self.device)
