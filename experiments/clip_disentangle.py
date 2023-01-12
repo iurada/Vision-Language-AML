@@ -81,9 +81,9 @@ class CLIPDisentangleExperiment:
         images, texts = data
         
         images= images.to(self.device)
-        texts = texts.to(self.device)
+        tokenized_desc = clip.tokenize(texts).to(self.device)
         
-        logits_per_image, logits_per_text = self.clip_model(images, texts)
+        logits_per_image, logits_per_text = self.clip_model(images, tokenized_desc)
 
         ground_truth = torch.arange(len(images),dtype=torch.long,device=self.device)
 
