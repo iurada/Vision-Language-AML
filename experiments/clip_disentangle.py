@@ -18,23 +18,24 @@ class CLIPDisentangleExperiment:
             param.requires_grad = True
 
         # Setup CLIP model
-        if opt['clip_pretrained'] == 'True':
-            self.clip_model, _ = clip.load('ViT-B/32', device='cpu') # load it first to CPU to ensure you're using fp32 precision.
-        else:
+        if opt['clip_pretrained'] == 'False':
             self.clip_model, _ = clip.load('ViT-B/32', device='cpu', jit=False) # load it first to CPU to ensure you're using fp32 precision.
+        else:
+            self.clip_model, _ = clip.load('ViT-B/32', device='cpu') # load it first to CPU to ensure you're using fp32 precision.
         
         self.clip_model = self.clip_model.to(self.device)
         self.clip_model.eval()
-        if opt['clip_pretrained'] == 'True':
-            for param in self.clip_model.parameters():
-                param.requires_grad = False    #to freeze the clip model
-        else:
+
+        if opt['clip_pretrained'] == 'False':
             for param in self.clip_model.parameters():
                 param.requires_grad = True
+        else:
+            for param in self.clip_model.parameters():
+                param.requires_grad = False    #to freeze the clip model
 
         # Setup optimization procedure
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=opt['lr'])
-        self.clip_optimizer = torch.optim.Adam(self.clip_model.parameters(), lr=5e-5,betas=(0.9,0.98),eps=1e-6,weight_decay=0.2)
+        self.clip_optimizer = torch.optim.Adam(self.clip_model.parameters(), lr=5e-5, betas=(0.9,0.98), eps=1e-6, weight_decay=0.2)
         
         self.criterion_CEL = torch.nn.CrossEntropyLoss(ignore_index=42)     #ingnore index 42 that is put to discriminate the target
         self.criterion_MSEL = torch.nn.MSELoss()
@@ -79,6 +80,10 @@ class CLIPDisentangleExperiment:
 
         return iteration, best_accuracy, total_train_loss
 
+    def freeze_clip(self):
+        for param in self.clip_model.parameters():
+            param.requires_grad = False    #to freeze the clip model
+
     def train_iteration_clip(self, data):
         self.clip_optimizer.zero_grad()
 
@@ -89,7 +94,7 @@ class CLIPDisentangleExperiment:
         
         logits_per_image, logits_per_text = self.clip_model(images, tokenized_desc)
 
-        ground_truth = torch.arange(len(images),dtype=torch.long,device=self.device)
+        ground_truth = torch.arange(len(images), dtype=torch.long, device=self.device)
 
         total_loss = (self.loss_img(logits_per_image, ground_truth) + self.loss_txt(logits_per_text, ground_truth))/2
         total_loss.backward()

@@ -70,8 +70,6 @@ class DomainDisentangleExperiment: # See point 2. of the project
         # logits[4] R
 
         loss_class_1 = self.criterion_CEL(logits[0], y) # CEL of the categories
-        # source_cats = len([y.ne(42).nonzero().squeeze(dim=1)])
-        # loss_class_1 = loss_class_1 + (loss_class_1/source_cats)*(32-source_cats) # Normalize the loss
         loss_class_2 = self.alpha_cat*(-self.criterion_EL(logits[3]))
         loss_class = loss_class_1 + loss_class_2 # Category encoder
 

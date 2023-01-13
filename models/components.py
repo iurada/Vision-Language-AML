@@ -93,7 +93,7 @@ class DomainClassifier(nn.Module):
         self.domain_classifier_DG = nn.Linear(512, 3)
     
     def forward(self, x, domain_generalization):
-        if domain_generalization == False:
+        if domain_generalization == 'False':
             x = self.domain_classifier_standard(x)
         else:
             x = self.domain_classifier_DG(x)
