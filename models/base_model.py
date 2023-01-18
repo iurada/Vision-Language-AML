@@ -16,7 +16,12 @@ class FeatureExtractor(nn.Module):
         x = self.resnet18.layer3(x)
         x = self.resnet18.layer4(x)
         x = self.resnet18.avgpool(x)
-        return x.squeeze()
+        y = x.squeeze()
+
+        if len(y.size()) < 2:
+            y = y.unsqueeze(0)
+
+        return y
 
 class BaselineModel(nn.Module):
     def __init__(self):
