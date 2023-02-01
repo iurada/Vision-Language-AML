@@ -35,6 +35,12 @@ DESCRIPTORS = {
     10: 'unrealistic',
 }
 
+def assign_domain_labels(target_domain):
+    if target_domain != 'photo':
+        current = DOMAINS[target_domain]
+        DOMAINS['photo'] = current
+        DOMAINS[target_domain] = 3
+
 
 class PACSDatasetBaseline(Dataset):
     def __init__(self, examples, transform):
@@ -48,12 +54,6 @@ class PACSDatasetBaseline(Dataset):
         img_path, y = self.examples[index]
         x = self.transform(Image.open(img_path).convert('RGB'))
         return x, y
-
-def assign_domain_labels(target_domain):
-    if target_domain != 'photo':
-        current = DOMAINS[target_domain]
-        DOMAINS['photo'] = current
-        DOMAINS[target_domain] = 3
 
 def read_lines(data_path, domain_name):
     examples = {}
