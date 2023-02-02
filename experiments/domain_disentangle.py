@@ -25,8 +25,8 @@ class DomainDisentangleExperiment: # See point 2. of the project
 
         # Setup loss weights
         self.weights = [3, 1.5, 0.5] 
-        self.alpha_cat = -0.05
-        self.alpha_dom = -0.003
+        self.alpha_cat = 0.05
+        self.alpha_dom = 0.003
 
         # Set Domain Generalization
         self.domain_generalization = opt['dom_gen']
